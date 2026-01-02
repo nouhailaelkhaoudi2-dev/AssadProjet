@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "501497831500",
+    "project_id": "projetassad",
+    "storage_bucket": "projetassad.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:501497831500:android:c8d60ddba304292738d4e9",
+        "android_client_info": {
+          "package_name": "com.example.tikitaka"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdkw9aSWYYbe_cPl6MneyM9obu1rqx3tc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
