@@ -113,17 +113,37 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
         debugPrint('🇫🇷 VOIX FRANÇAISES: ${frenchVoices.length}');
         
         if (frenchVoices.isNotEmpty) {
-          // Priorité 1: Henri (voix Neural Microsoft - la meilleure)
-          var selectedVoice = frenchVoices.firstWhere(
-            (v) => v['name']?.toString().toLowerCase().contains('henri') == true,
-            orElse: () => frenchVoices.firstWhere(
-              // Priorité 2: Google français
-              (v) => v['name']?.toString().toLowerCase().contains('google') == true,
-              orElse: () => frenchVoices.first,
-            ),
+          // Priorité aux voix MASCULINES françaises
+          dynamic selectedVoice;
+          
+          // 1. Henri (voix Neural Microsoft masculine - la meilleure)
+          selectedVoice = frenchVoices.cast<dynamic?>().firstWhere(
+            (v) => v?['name']?.toString().toLowerCase().contains('henri') == true,
+            orElse: () => null,
           );
           
-          debugPrint('🔊 SÉLECTIONNÉE: ${selectedVoice['name']}');
+          // 2. Paul (voix Microsoft masculine)
+          selectedVoice ??= frenchVoices.cast<dynamic?>().firstWhere(
+            (v) => v?['name']?.toString().toLowerCase().contains('paul') == true,
+            orElse: () => null,
+          );
+          
+          // 3. Google français (voix masculine)
+          selectedVoice ??= frenchVoices.cast<dynamic?>().firstWhere(
+            (v) => v?['name']?.toString().toLowerCase().contains('google') == true,
+            orElse: () => null,
+          );
+          
+          // 4. Thomas (voix masculine si disponible)
+          selectedVoice ??= frenchVoices.cast<dynamic?>().firstWhere(
+            (v) => v?['name']?.toString().toLowerCase().contains('thomas') == true,
+            orElse: () => null,
+          );
+          
+          // Fallback: première voix française disponible
+          selectedVoice ??= frenchVoices.first;
+          
+          debugPrint('🔊 VOIX MASCULINE SÉLECTIONNÉE: ${selectedVoice['name']}');
           
           await _tts.setVoice({
             'name': selectedVoice['name'],
@@ -273,137 +293,90 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
                   ),
                 ),
 
-                // Avatar
+                // Avatar - Mascotte officielle CAN 2025
                 Center(
-                  child: AnimatedBuilder(
-                    animation: _pulseAnimation,
-                    builder: (context, child) {
-                      return Transform.scale(
-                        scale: _isSpeaking ? _pulseAnimation.value : 1.0,
-                        child: child,
-                      );
-                    },
-                    child: Container(
-                      width: 220,
-                      height: 220,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: _isSpeaking
-                              ? [AppColors.secondary, AppColors.secondaryDark]
-                              : [AppColors.primary, AppColors.primaryDark],
-                        ),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.3),
-                          width: 4,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.3),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          TweenAnimationBuilder<double>(
-                            tween: Tween(begin: 0, end: _isSpeaking ? 1 : 0),
-                            duration: const Duration(milliseconds: 300),
-                            builder: (context, value, child) {
-                              return Transform.scale(
-                                scale: 1 + (value * 0.1),
-                                child: Text(
-                                  '🦁',
-                                  style: TextStyle(fontSize: 80 + (value * 10)),
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Mascotte avec animations
+                      AnimatedBuilder(
+                        animation: _pulseAnimation,
+                        builder: (context, child) {
+                          // Animation de rebond quand parle
+                          final bounceOffset = _isSpeaking 
+                              ? math.sin(_pulseController.value * math.pi * 4) * 5
+                              : 0.0;
+                          
+                          return Transform.translate(
+                            offset: Offset(0, bounceOffset),
+                            child: Transform.scale(
+                              scale: _isSpeaking ? 1.0 + (_pulseAnimation.value - 1.0) * 0.5 : 1.0,
+                              child: child,
                             ),
-                            child: Text(
-                              _isSpeaking ? '🔊 Parle...' : 'TikiTaka',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Ondes sonores
-                if (_isSpeaking)
-                  Center(
-                    child: AnimatedBuilder(
-                      animation: _pulseAnimation,
-                      builder: (context, child) {
-                        return Container(
-                          width: 280 * _pulseAnimation.value,
-                          height: 280 * _pulseAnimation.value,
+                          );
+                        },
+                        child: Container(
                           decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: AppColors.secondary.withValues(alpha: 0.3),
-                              width: 3,
-                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: (_isSpeaking ? AppColors.secondary : AppColors.primary)
+                                    .withValues(alpha: 0.4),
+                                blurRadius: _isSpeaking ? 50 : 30,
+                                spreadRadius: _isSpeaking ? 10 : 5,
+                              ),
+                            ],
                           ),
-                        );
-                      },
-                    ),
-                  ),
-
-                // Indicateur
-                if (_isSpeaking)
-                  Positioned(
-                    bottom: 20,
-                    left: 0,
-                    right: 0,
-                    child: Center(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          child: Image.asset(
+                            'assets/images/Capture_d_écran_2025-12-22_221422-removebg-preview.png',
+                            width: 250,
+                            height: 300,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // Label avec état
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                         decoration: BoxDecoration(
-                          color: AppColors.secondary,
+                          gradient: LinearGradient(
+                            colors: _isSpeaking
+                                ? [AppColors.secondary, AppColors.secondaryDark]
+                                : [AppColors.primary, AppColors.primaryDark],
+                          ),
                           borderRadius: BorderRadius.circular(25),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.secondary.withValues(alpha: 0.4),
-                              blurRadius: 15,
-                              spreadRadius: 2,
+                              color: (_isSpeaking ? AppColors.secondary : AppColors.primary)
+                                  .withValues(alpha: 0.5),
+                              blurRadius: 20,
+                              spreadRadius: 3,
                             ),
                           ],
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            _buildSoundWave(),
-                            const SizedBox(width: 10),
-                            const Text(
-                              'En train de parler...',
-                              style: TextStyle(
+                            if (_isSpeaking) ...[
+                              _buildSoundWave(),
+                              const SizedBox(width: 10),
+                            ],
+                            Text(
+                              _isSpeaking ? 'TikiTaka parle...' : 'TikiTaka',
+                              style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
+                    ],
                   ),
+                ),
+
               ],
             ),
           ),
@@ -577,10 +550,21 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
         children: [
           Row(
             children: [
-              Text(isUser ? '👤' : '🦁', style: const TextStyle(fontSize: 14)),
+              if (isUser)
+                const Text('👤', style: TextStyle(fontSize: 14))
+              else
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.asset(
+                    'assets/images/Capture_d_écran_2025-12-22_221422-removebg-preview.png',
+                    width: 20,
+                    height: 20,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               const SizedBox(width: 6),
               Text(
-                isUser ? 'Vous' : 'Assistant CAN',
+                isUser ? 'Vous' : 'TikiTaka',
                 style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 11, fontWeight: FontWeight.w500),
               ),
             ],
