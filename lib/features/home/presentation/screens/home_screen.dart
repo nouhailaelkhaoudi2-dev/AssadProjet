@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/providers/services_providers.dart';
+import '../../../../core/providers/favorite_team_provider.dart';
 import '../widgets/stats_card.dart';
 import '../widgets/quick_access_card.dart';
 import '../widgets/upcoming_match_card.dart';
@@ -13,7 +14,9 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final upcomingMatchesAsync = ref.watch(upcomingMatchesProvider);
+    final upcomingMatchesAsync = ref.watch(prioritizedMatchesProvider);
+    final favoriteTeam = ref.watch(favoriteTeamProvider);
+    final favoriteTeamPlaysToday = ref.watch(favoriteTeamPlaysTodayProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -63,12 +66,12 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    const Positioned(
+                    Positioned(
                       right: 20,
                       bottom: 60,
                       child: Text(
-                        '🇲🇦',
-                        style: TextStyle(fontSize: 50),
+                        favoriteTeam?.flagEmoji ?? '🇲🇦',
+                        style: const TextStyle(fontSize: 50),
                       ),
                     ),
                   ],
@@ -91,10 +94,12 @@ class HomeScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Message de bienvenue
-                  const Text(
-                    'Bienvenue ! 👋',
-                    style: TextStyle(
-                      fontSize: 24,
+                  Text(
+                    favoriteTeam != null 
+                        ? 'Bienvenue, supporter ${favoriteTeam.name} ! ${favoriteTeam.flagEmoji}'
+                        : 'Bienvenue ! 👋',
+                    style: const TextStyle(
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
                     ),
@@ -109,6 +114,93 @@ class HomeScreen extends ConsumerWidget {
                   ),
 
                   const SizedBox(height: 24),
+
+                  // Alerte match équipe favorite
+                  favoriteTeamPlaysToday.when(
+                    data: (match) {
+                      if (match == null || favoriteTeam == null) {
+                        return const SizedBox.shrink();
+                      }
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              AppColors.primary.withValues(alpha: 0.9),
+                              AppColors.secondary.withValues(alpha: 0.9),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.3),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Text(
+                                favoriteTeam.flagEmoji,
+                                style: const TextStyle(fontSize: 24),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    '🔥 Votre équipe joue aujourd\'hui !',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${match.homeTeam.name} vs ${match.awayTeam.name}',
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(alpha: 0.9),
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                _formatTime(match.dateTime),
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
+                  ),
 
                   // Statistiques rapides
                   const Text(

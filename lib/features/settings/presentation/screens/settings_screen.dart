@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../core/providers/favorite_team_provider.dart';
+import '../../../matches/domain/entities/team.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final user = FirebaseAuth.instance.currentUser;
+    final favoriteTeam = ref.watch(favoriteTeamProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -22,7 +26,7 @@ class SettingsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Avatar et nom
+            // Avatar et nom avec équipe favorite
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
@@ -47,9 +51,10 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     child: Center(
                       child: Text(
-                        user?.displayName?.isNotEmpty == true
-                            ? user!.displayName![0].toUpperCase()
-                            : '👤',
+                        favoriteTeam?.flagEmoji ?? 
+                          (user?.displayName?.isNotEmpty == true
+                              ? user!.displayName![0].toUpperCase()
+                              : '👤'),
                         style: const TextStyle(
                           fontSize: 32,
                           color: Colors.white,
@@ -75,6 +80,30 @@ class SettingsScreen extends StatelessWidget {
                       ),
                     ),
                   ],
+                  if (favoriteTeam != null) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(favoriteTeam.flagEmoji, style: const TextStyle(fontSize: 18)),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Supporter ${favoriteTeam.name}',
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -88,8 +117,10 @@ class SettingsScreen extends StatelessWidget {
                 _SettingsTile(
                   icon: Icons.favorite,
                   title: 'Équipe favorite',
-                  subtitle: 'Maroc 🇲🇦',
-                  onTap: () => _showTeamPicker(context),
+                  subtitle: favoriteTeam != null 
+                      ? '${favoriteTeam.flagEmoji} ${favoriteTeam.name}'
+                      : 'Aucune équipe sélectionnée',
+                  onTap: () => _showTeamPicker(context, ref),
                 ),
                 _SettingsTile(
                   icon: Icons.language,
@@ -223,40 +254,114 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  void _showTeamPicker(BuildContext context) {
+  void _showTeamPicker(BuildContext context, WidgetRef ref) {
+    final favoriteTeam = ref.read(favoriteTeamProvider);
+    
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
+        height: MediaQuery.of(context).size.height * 0.85,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Choisir votre équipe favorite',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+            // Handle
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                '🇲🇦 Maroc',
-                '🇪🇬 Égypte',
-                '🇳🇬 Nigeria',
-                '🇸🇳 Sénégal',
-                '🇩🇿 Algérie',
-                '🇨🇮 Côte d\'Ivoire',
-              ].map((team) => ChoiceChip(
-                label: Text(team),
-                selected: team.contains('Maroc'),
-                onSelected: (selected) => Navigator.pop(context),
-              )).toList(),
+            
+            // Header
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  const Text(
+                    'Choisir votre équipe',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (favoriteTeam != null)
+                    TextButton(
+                      onPressed: () {
+                        ref.read(favoriteTeamProvider.notifier).clearFavoriteTeam();
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Réinitialiser'),
+                    ),
+                ],
+              ),
             ),
-            const SizedBox(height: 24),
+            
+            // Liste des équipes par groupe
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  for (final group in ['A', 'B', 'C', 'D', 'E', 'F']) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16, bottom: 8),
+                      child: Text(
+                        'Groupe $group',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ),
+                    ...AfconTeams.getTeamsByGroup(group).map((team) {
+                      final isSelected = favoriteTeam?.code == team.code;
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        decoration: BoxDecoration(
+                          color: isSelected 
+                              ? AppColors.primary.withValues(alpha: 0.1)
+                              : Colors.grey[50],
+                          borderRadius: BorderRadius.circular(12),
+                          border: isSelected 
+                              ? Border.all(color: AppColors.primary, width: 2)
+                              : null,
+                        ),
+                        child: ListTile(
+                          leading: Text(
+                            team.flagEmoji,
+                            style: const TextStyle(fontSize: 28),
+                          ),
+                          title: Text(
+                            team.name,
+                            style: TextStyle(
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              color: isSelected ? AppColors.primary : null,
+                            ),
+                          ),
+                          trailing: isSelected 
+                              ? const Icon(Icons.check_circle, color: AppColors.primary)
+                              : null,
+                          onTap: () {
+                            ref.read(favoriteTeamProvider.notifier).setFavoriteTeam(team);
+                            Navigator.pop(context);
+                          },
+                        ),
+                      );
+                    }),
+                  ],
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
           ],
         ),
       ),

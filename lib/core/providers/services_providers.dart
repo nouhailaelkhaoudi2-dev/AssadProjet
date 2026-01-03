@@ -4,6 +4,7 @@ import '../services/news_api_service.dart';
 import '../services/groq_service.dart';
 import '../../features/matches/domain/entities/match.dart';
 import '../../features/news/domain/entities/news_article.dart';
+import 'favorite_team_provider.dart';
 
 // ============== SERVICES ==============
 
@@ -54,11 +55,66 @@ final standingsProvider = FutureProvider<Map<String, List<Map<String, dynamic>>>
   return service.getStandings();
 });
 
+/// Provider pour les matchs triés avec l'équipe favorite en priorité
+final prioritizedMatchesProvider = FutureProvider<List<Match>>((ref) async {
+  final service = ref.watch(footballServiceProvider);
+  final favoriteTeam = ref.watch(favoriteTeamProvider);
+  final matches = await service.getUpcomingMatches(limit: 20);
+  
+  if (favoriteTeam == null) {
+    return matches.take(10).toList();
+  }
+  
+  // Séparer les matchs de l'équipe favorite
+  final favoriteMatches = matches.where((m) =>
+    m.homeTeam.code == favoriteTeam.code ||
+    m.awayTeam.code == favoriteTeam.code
+  ).toList();
+  
+  final otherMatches = matches.where((m) =>
+    m.homeTeam.code != favoriteTeam.code &&
+    m.awayTeam.code != favoriteTeam.code
+  ).toList();
+  
+  // Retourner les matchs de l'équipe favorite d'abord
+  return [...favoriteMatches, ...otherMatches].take(10).toList();
+});
+
+/// Provider pour vérifier si l'équipe favorite joue aujourd'hui
+final favoriteTeamPlaysTodayProvider = FutureProvider<Match?>((ref) async {
+  final service = ref.watch(footballServiceProvider);
+  final favoriteTeam = ref.watch(favoriteTeamProvider);
+  
+  if (favoriteTeam == null) return null;
+  
+  final todayMatches = await service.getTodayMatches();
+  
+  try {
+    return todayMatches.firstWhere((m) =>
+      m.homeTeam.code == favoriteTeam.code ||
+      m.awayTeam.code == favoriteTeam.code
+    );
+  } catch (_) {
+    return null;
+  }
+});
+
 // ============== NEWS ==============
 
-/// Provider pour les actualités
+/// Provider pour les actualités (filtrées par équipe favorite si définie)
 final newsProvider = FutureProvider<List<NewsArticle>>((ref) async {
   final service = ref.watch(newsServiceProvider);
+  final favoriteTeam = ref.watch(favoriteTeamProvider);
+  
+  // Si une équipe favorite est définie, chercher les news de cette équipe
+  if (favoriteTeam != null) {
+    return service.getNews(
+      query: '${favoriteTeam.name} football CAN 2025',
+      pageSize: 20,
+    );
+  }
+  
+  // Sinon, actualités générales CAN 2025
   return service.getNews(pageSize: 20);
 });
 
@@ -72,6 +128,18 @@ final sportsHeadlinesProvider = FutureProvider<List<NewsArticle>>((ref) async {
 final teamNewsProvider = FutureProvider.family<List<NewsArticle>, String>((ref, teamName) async {
   final service = ref.watch(newsServiceProvider);
   return service.searchByTeam(teamName);
+});
+
+/// Provider pour les news de l'équipe favorite uniquement
+final favoriteTeamNewsProvider = FutureProvider<List<NewsArticle>>((ref) async {
+  final service = ref.watch(newsServiceProvider);
+  final favoriteTeam = ref.watch(favoriteTeamProvider);
+  
+  if (favoriteTeam == null) {
+    return [];
+  }
+  
+  return service.searchByTeam(favoriteTeam.name);
 });
 
 // ============== CHATBOT ==============
