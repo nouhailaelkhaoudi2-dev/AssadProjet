@@ -46,3 +46,6 @@ app.*.map.json
 # Firebase - Ne pas commiter les fichiers sensibles
 google-services.json
 GoogleService-Info.plist
+
+# Variables d'environnement (cles API)
+.env

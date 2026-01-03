@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation Technique - CAN 2025 Morocco App</title>
+    <style>
+        :root {
+            --primary: #C8102E;
+            --primary-dark: #8B0000;
+            --secondary: #006233;
+            --gold: #C9A227;
+            --dark: #1A1F25;
+            --light: #F8F9FA;
+            --gray: #6C757D;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
+            color: var(--dark);
+            background: var(--light);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30L30 0z' fill='%23ffffff' fill-opacity='0.03'/%3E%3C/svg%3E");
+            animation: slide 20s linear infinite;
+        }
+
+        @keyframes slide {
+            0% { transform: translateX(0) translateY(0); }
+            100% { transform: translateX(60px) translateY(60px); }
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header .badge {
+            display: inline-block;
+            background: var(--gold);
+            color: var(--dark);
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            margin-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .meta-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .meta-item {
+            text-align: center;
+            padding: 15px;
+        }
+
+        .meta-item .label {
+            font-size: 0.85rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .meta-item .value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .section {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+            color: var(--primary);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title .number {
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        h3 {
+            color: var(--dark);
+            margin: 25px 0 15px;
+            font-size: 1.2rem;
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: #444;
+        }
+
+        ul, ol {
+            margin: 15px 0 15px 25px;
+        }
+
+        li {
+            margin-bottom: 10px;
+            color: #444;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #FFF5F5 0%, #FFF0F0 100%);
+            border-left: 4px solid var(--primary);
+            padding: 20px 25px;
+            margin: 20px 0;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .highlight-box.green {
+            background: linear-gradient(135deg, #F0FFF4 0%, #E6FFED 100%);
+            border-left-color: var(--secondary);
+        }
+
+        .highlight-box.gold {
+            background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+            border-left-color: var(--gold);
+        }
+
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .tech-card {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid #E5E7EB;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .tech-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .tech-card h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .tech-card p {
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+
+        .screen-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 25px 0;
+        }
+
+        .screen-card {
+            background: white;
+            border: 2px solid #E5E7EB;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .screen-card:hover {
+            border-color: var(--primary);
+        }
+
+        .screen-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 18px 20px;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        .screen-body {
+            padding: 20px;
+        }
+
+        .screen-body ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .screen-body li {
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .architecture-diagram {
+            background: #1E293B;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 25px 0;
+            overflow-x: auto;
+        }
+
+        .architecture-diagram pre {
+            color: #E2E8F0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            margin: 0;
+            white-space: pre;
+        }
+
+        .phase-timeline {
+            position: relative;
+            padding-left: 40px;
+            margin: 30px 0;
+        }
+
+        .phase-timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+            border-radius: 3px;
+        }
+
+        .phase-item {
+            position: relative;
+            margin-bottom: 35px;
+            padding: 25px;
+            background: var(--light);
+            border-radius: 12px;
+            border: 1px solid #E5E7EB;
+        }
+
+        .phase-item::before {
+            content: '';
+            position: absolute;
+            left: -33px;
+            top: 30px;
+            width: 16px;
+            height: 16px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .phase-item h4 {
+            color: var(--primary);
+            font-size: 1.15rem;
+            margin-bottom: 12px;
+        }
+
+        .phase-item .duration {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            margin-bottom: 12px;
+        }
+
+        .api-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95rem;
+        }
+
+        .api-table th {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .api-table td {
+            padding: 15px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .api-table tr:hover td {
+            background: #FFF5F5;
+        }
+
+        .api-table code {
+            background: #F1F5F9;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
+            color: var(--primary-dark);
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 10px;
+        }
+
+        .feature-item .icon {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.9rem;
+        }
+
+        .feature-item .text {
+            font-size: 0.95rem;
+        }
+
+        .code-block {
+            background: #1E293B;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            color: #E2E8F0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .code-block .comment { color: #6B7280; }
+        .code-block .keyword { color: #F472B6; }
+        .code-block .string { color: #34D399; }
+        .code-block .function { color: #60A5FA; }
+
+        .warning-box {
+            background: #FEF2F2;
+            border: 1px solid #FECACA;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .warning-box .icon {
+            font-size: 1.5rem;
+        }
+
+        .success-box {
+            background: #F0FDF4;
+            border: 1px solid #BBF7D0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .toc {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .toc h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+
+        .toc-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            columns: 2;
+            column-gap: 40px;
+        }
+
+        .toc-list li {
+            margin-bottom: 12px;
+            break-inside: avoid;
+        }
+
+        .toc-list a {
+            color: var(--dark);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .toc-list a:hover {
+            background: #FFF5F5;
+            color: var(--primary);
+        }
+
+        .toc-list .num {
+            background: var(--primary);
+            color: white;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .footer {
+            background: var(--dark);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .footer p {
+            color: #9CA3AF;
+            margin-bottom: 10px;
+        }
+
+        .footer .version {
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .section {
+                padding: 25px;
+            }
+
+            .toc-list {
+                columns: 1;
+            }
+
+            .phase-timeline {
+                padding-left: 30px;
+            }
+        }
+
+        @media print {
+            .header {
+                background: var(--primary) !important;
+                -webkit-print-color-adjust: exact;
+            }
+
+            .section {
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <h1>CAN 2025 Morocco</h1>
+    <p class="subtitle">Documentation Technique et Plan de Développement</p>
+    <p class="subtitle">Application Mobile & Web avec Assistant IA</p>
+    <span class="badge">Flutter + Gemini AI</span>
+</header>
+
+<div class="container">
+
+    <div class="meta-info">
+        <div class="meta-item">
+            <div class="label">Projet</div>
+            <div class="value">Application CAN 2025</div>
+        </div>
+        <div class="meta-item">
+            <div class="label">Plateformes</div>
+            <div class="value">iOS, Android, Web</div>
+        </div>
+        <div class="meta-item">
+            <div class="label">Framework</div>
+            <div class="value">Flutter 3.x</div>
+        </div>
+        <div class="meta-item">
+            <div class="label">Architecture</div>
+            <div class="value">Clean Architecture</div>
+        </div>
+    </div>
+
+    <nav class="toc">
+        <h2>Table des Matières</h2>
+        <ol class="toc-list">
+            <li><a href="#contexte"><span class="num">1</span> Contexte et Objectifs</a></li>
+            <li><a href="#analyse"><span class="num">2</span> Analyse de l'Existant</a></li>
+            <li><a href="#architecture"><span class="num">3</span> Architecture Technique</a></li>
+            <li><a href="#ecrans"><span class="num">4</span> Spécifications des Écrans</a></li>
+            <li><a href="#ia"><span class="num">5</span> Module Intelligence Artificielle</a></li>
+            <li><a href="#apis"><span class="num">6</span> Intégration des APIs</a></li>
+            <li><a href="#securite"><span class="num">7</span> Sécurité et Bonnes Pratiques</a></li>
+            <li><a href="#phases"><span class="num">8</span> Plan de Développement</a></li>
+            <li><a href="#structure"><span class="num">9</span> Structure du Projet</a></li>
+            <li><a href="#livrables"><span class="num">10</span> Livrables Attendus</a></li>
+        </ol>
+    </nav>
+
+    <section id="contexte" class="section">
+        <h2 class="section-title"><span class="number">1</span> Contexte et Objectifs</h2>
+
+        <h3>Présentation du Projet</h3>
+        <p>
+            Dans le cadre de la Coupe d'Afrique des Nations 2025 organisée au Maroc, ce projet vise à développer
+            une application mobile et web complète destinée aux supporters et passionnés de football. L'application
+            combine des fonctionnalités d'information sportive avec un assistant conversationnel intelligent
+            exploitant les dernières avancées en matière d'intelligence artificielle générative.
+        </p>
+
+        <div class="highlight-box">
+            <strong>Vision du Projet :</strong> Offrir aux fans de la CAN 2025 une expérience utilisateur
+            moderne et interactive, où l'information est accessible instantanément via un chatbot intelligent
+            capable de comprendre le contexte et de fournir des réponses précises et sourcées.
+        </div>
+
+        <h3>Objectifs Principaux</h3>
+        <div class="feature-list">
+            <div class="feature-item">
+                <span class="icon">💬</span>
+                <span class="text"><strong>Chatbot IA</strong> - Assistant conversationnel pour toutes les questions sur la CAN</span>
+            </div>
+            <div class="feature-item">
+                <span class="icon">🎙️</span>
+                <span class="text"><strong>Avatar Vocal</strong> - Interaction vocale avec reconnaissance et synthèse de parole</span>
+            </div>
+            <div class="feature-item">
+                <span class="icon">📊</span>
+                <span class="text"><strong>Résumés Automatiques</strong> - Génération de résumés de matchs par IA</span>
+            </div>
+            <div class="feature-item">
+                <span class="icon">📈</span>
+                <span class="text"><strong>Analyse de Sentiment</strong> - Suivi de l'opinion des supporters</span>
+            </div>
+            <div class="feature-item">
+                <span class="icon">📰</span>
+                <span class="text"><strong>Actualités</strong> - Flux d'informations en temps réel</span>
+            </div>
+            <div class="feature-item">
+                <span class="icon">🎫</span>
+                <span class="text"><strong>Billetterie</strong> - Accès direct à l'achat de billets officiels</span>
+            </div>
+        </div>
+
+        <h3>Périmètre Fonctionnel</h3>
+        <p>L'application couvrira les domaines suivants :</p>
+        <ul>
+            <li><strong>Information sportive :</strong> calendrier des matchs, résultats, classements par groupe, statistiques des équipes</li>
+            <li><strong>Contenu éditorial :</strong> actualités, articles, analyses</li>
+            <li><strong>Expérience fan :</strong> fanzones, stades, guide pratique du supporter</li>
+            <li><strong>Services :</strong> billetterie, convertisseur de devises</li>
+            <li><strong>Intelligence artificielle :</strong> chatbot, avatar vocal, génération de résumés, analyse de sentiment</li>
+        </ul>
+    </section>
+
+    <section id="analyse" class="section">
+        <h2 class="section-title"><span class="number">2</span> Analyse de l'Existant</h2>
+
+        <h3>État Actuel du Projet</h3>
+        <p>
+            Une première version de l'application existe déjà avec une base fonctionnelle. L'analyse du code
+            source révèle les éléments suivants :
+        </p>
+
+        <div class="highlight-box green">
+            <strong>Points Forts Identifiés :</strong>
+            <ul style="margin-top: 10px; margin-bottom: 0;">
+                <li>Interface utilisateur soignée avec une identité visuelle cohérente (tons rouge/bordeaux)</li>
+                <li>Authentification Firebase fonctionnelle (inscription, connexion, récupération de mot de passe)</li>
+                <li>Navigation fluide avec animations de transition</li>
+                <li>Design responsive adapté aux différentes tailles d'écran</li>
+                <li>Structure d'écrans de base en place</li>
+            </ul>
+        </div>
+
+        <h3>Éléments Existants</h3>
+        <table class="api-table">
+            <thead>
+                <tr>
+                    <th>Composant</th>
+                    <th>État</th>
+                    <th>Observations</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Authentification</td>
+                    <td><span style="color: var(--secondary);">✓ Fonctionnel</span></td>
+                    <td>Firebase Auth avec email/password, vérification email</td>
+                </tr>
+                <tr>
+                    <td>Page d'accueil</td>
+                    <td><span style="color: var(--secondary);">✓ Fonctionnel</span></td>
+                    <td>Navigation par onglets, design établi</td>
+                </tr>
+                <tr>
+                    <td>Écran Stades</td>
+                    <td><span style="color: orange;">◐ Partiel</span></td>
+                    <td>Interface OK, données statiques</td>
+                </tr>
+                <tr>
+                    <td>Écran Billetterie</td>
+                    <td><span style="color: orange;">◐ Partiel</span></td>
+                    <td>Interface OK, redirection à implémenter</td>
+                </tr>
+                <tr>
+                    <td>Historique CAN</td>
+                    <td><span style="color: var(--secondary);">✓ Fonctionnel</span></td>
+                    <td>Liste des vainqueurs passés</td>
+                </tr>
+                <tr>
+                    <td>Convertisseur Devises</td>
+                    <td><span style="color: orange;">◐ Partiel</span></td>
+                    <td>Fonctionnel avec taux statiques</td>
+                </tr>
+                <tr>
+                    <td>Chatbot IA</td>
+                    <td><span style="color: var(--primary);">✗ À développer</span></td>
+                    <td>Interface placeholder uniquement</td>
+                </tr>
+                <tr>
+                    <td>Avatar Vocal</td>
+                    <td><span style="color: var(--primary);">✗ À développer</span></td>
+                    <td>Non implémenté</td>
+                </tr>
+                <tr>
+                    <td>APIs Externes</td>
+                    <td><span style="color: var(--primary);">✗ À développer</span></td>
+                    <td>Aucune intégration API réelle</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Axes d'Amélioration Identifiés</h3>
+        <div class="warning-box">
+            <span class="icon">⚠️</span>
+            <div>
+                <strong>Refactoring Nécessaire :</strong>
+                <ul style="margin-top: 10px; margin-bottom: 0;">
+                    <li><strong>Architecture :</strong> Passage à une Clean Architecture pour la maintenabilité</li>
+                    <li><strong>Gestion d'état :</strong> Adoption de Riverpod pour remplacer setState()</li>
+                    <li><strong>Modèles de données :</strong> Création de classes typées au lieu de Map<String, dynamic></li>
+                    <li><strong>Services :</strong> Mise en place de repositories et services d'API</li>
+                    <li><strong>Tests :</strong> Ajout de tests unitaires et d'intégration</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="architecture" class="section">
+        <h2 class="section-title"><span class="number">3</span> Architecture Technique</h2>
+
+        <h3>Choix Architectural : Clean Architecture avec Feature-First</h3>
+        <p>
+            L'architecture retenue combine les principes de la Clean Architecture avec une organisation
+            par fonctionnalité (feature-first). Cette approche offre une séparation claire des responsabilités
+            et facilite l'évolution du projet.
+        </p>
+
+        <div class="architecture-diagram">
+            <pre>
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              PRÉSENTATION                                    │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
+│  │   Screens   │  │   Widgets   │  │ Controllers │  │   States    │        │
+│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                DOMAINE                                       │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐                          │
+│  │  Entities   │  │  Use Cases  │  │ Repositories│  (interfaces)            │
+│  └─────────────┘  └─────────────┘  └─────────────┘                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                DONNÉES                                       │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
+│  │   Models    │  │ Data Sources│  │ Repositories│  │   Cache     │        │
+│  │   (DTOs)    │  │  (Remote)   │  │   (Impl)    │  │  (Local)    │        │
+│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                            INFRASTRUCTURE                                    │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
+│  │  Firebase   │  │ HTTP Client │  │  Local DB   │  │   Gemini    │        │
+│  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘        │
+└─────────────────────────────────────────────────────────────────────────────┘
+            </pre>
+        </div>
+
+        <h3>Stack Technique</h3>
+        <div class="tech-stack">
+            <div class="tech-card">
+                <h4>Framework & Langage</h4>
+                <p>Flutter 3.x avec Dart 3.x. Support multiplateforme natif pour iOS, Android et Web Chrome.</p>
+            </div>
+            <div class="tech-card">
+                <h4>Gestion d'État</h4>
+                <p><strong>Riverpod 2.x</strong> - Solution moderne, type-safe, avec support du code generation. Excellente testabilité et scalabilité.</p>
+            </div>
+            <div class="tech-card">
+                <h4>Navigation</h4>
+                <p><strong>GoRouter</strong> - Routing déclaratif, deep linking, support web natif avec URLs propres.</p>
+            </div>
+            <div class="tech-card">
+                <h4>Requêtes HTTP</h4>
+                <p><strong>Dio</strong> - Client HTTP avancé avec intercepteurs, retry automatique, gestion du cache.</p>
+            </div>
+            <div class="tech-card">
+                <h4>Intelligence Artificielle</h4>
+                <p><strong>Google Generative AI (Gemini)</strong> - LLM pour le chatbot avec support du function calling.</p>
+            </div>
+            <div class="tech-card">
+                <h4>Stockage Local</h4>
+                <p><strong>Hive</strong> - Base de données NoSQL légère et performante pour le cache et les préférences.</p>
+            </div>
+            <div class="tech-card">
+                <h4>Reconnaissance Vocale</h4>
+                <p><strong>speech_to_text</strong> (mobile) + Web Speech API (web) pour la transcription vocale.</p>
+            </div>
+            <div class="tech-card">
+                <h4>Synthèse Vocale</h4>
+                <p><strong>flutter_tts</strong> (mobile) + Web Speech API (web) pour la lecture des réponses.</p>
+            </div>
+        </div>
+
+        <h3>Dépendances Principales</h3>
+        <div class="code-block">
+            <code>
+<span class="comment"># pubspec.yaml - Dépendances du projet</span>
+
+<span class="keyword">dependencies:</span>
+  flutter:
+    sdk: flutter
+
+  <span class="comment"># État & Architecture</span>
+  flutter_riverpod: ^2.4.9
+  riverpod_annotation: ^2.3.3
+  go_router: ^13.0.0
+
+  <span class="comment"># Réseau & API</span>
+  dio: ^5.4.0
+  retrofit: ^4.0.3
+  json_annotation: ^4.8.1
+
+  <span class="comment"># Firebase</span>
+  firebase_core: ^2.24.2
+  firebase_auth: ^4.16.0
+
+  <span class="comment"># IA & LLM</span>
+  google_generative_ai: ^0.2.0
+
+  <span class="comment"># Voix</span>
+  speech_to_text: ^6.5.1
+  flutter_tts: ^3.8.5
+
+  <span class="comment"># Stockage</span>
+  hive_flutter: ^1.1.0
+  shared_preferences: ^2.2.2
+
+  <span class="comment"># UI</span>
+  flutter_animate: ^4.3.0
+  cached_network_image: ^3.3.1
+  fl_chart: ^0.66.0
+  url_launcher: ^6.2.2
+  webview_flutter: ^4.4.4
+            </code>
+        </div>
+    </section>
+
+    <section id="ecrans" class="section">
+        <h2 class="section-title"><span class="number">4</span> Spécifications des Écrans</h2>
+
+        <p>
+            L'application comportera 10 écrans principaux accessibles via une navigation par onglets
+            et un drawer latéral pour les fonctions secondaires.
+        </p>
+
+        <div class="screen-grid">
+            <div class="screen-card">
+                <div class="screen-header">1. Dashboard / Accueil</div>
+                <div class="screen-body">
+                    <ul>
+                        <li>Statistiques clés : matchs du jour, prochains matchs</li>
+                        <li>Tendance : équipe la plus suivie</li>
+                        <li>Top 3 des actualités récentes</li>
+                        <li>Indicateur de sentiment global</li>
+                        <li>Accès rapide aux fonctionnalités principales</li>
+                        <li>Carrousel des matchs à venir</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="screen-card">
+                <div class="screen-header">2. Chatbot IA</div>
+                <div class="screen-body">
+                    <ul>
+                        <li>Interface de messagerie instantanée</li>
+                        <li>Suggestions rapides (chips cliquables)</li>
+                        <li>Affichage des sources dans les réponses</li>
+                        <li>Historique de conversation persistant</li>
+                        <li>Indicateur de chargement animé</li>
+                        <li>Support du markdown dans les réponses</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="screen-card">
+                <div class="screen-header">3. Avatar Vocal</div>
+                <div class="screen-body">
+                    <ul>
+                        <li>Bouton micro avec animation d'écoute</li>
+                        <li>Transcription en temps réel (STT)</li>
+                        <li>Lecture audio des réponses (TTS)</li>
+                        <li>Mode conversation continue</li>
+                        <li>Affichage texte synchronisé</li>
+                        <li>Sélection de la voix (si disponible)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="screen-card">
+                <div class="screen-header">4. Résumés des Matchs</div>
+                <div class="screen-body">
+                    <ul>
+                        <li>Liste des matchs terminés</li>
+                        <li>Bouton "Générer résumé" par match</li>
+                        <li>Résumé court (3-4 phrases)</li>
+                        <li>Résumé détaillé (optionnel)</li>
+                        <li>Moments clés du match</li>
+                        <li>Statistiques du match</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="screen-card">
+                <div class="screen-header">5. Matchs à Venir</div>
+                <div class="screen-body">
+                    <ul>
+                        <li>Liste complète du calendrier</li>
+                        <li>Filtres : date, équipe, groupe, stade</li>
+                        <li>Détail : heure, lieu, chaîne TV</li>
+                        <li>Notification de rappel (optionnel)</li>
+                        <li>Vue calendrier et vue liste</li>
+                        <li>Countdown pour les matchs imminents</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="screen-card">
+                <div class="screen-header">6. Actualités CAN 2025</div>
+                <div class="screen-body">
+                    <ul>
+                        <li>Flux d'articles via NewsAPI</li>
+                        <li>Catégorisation par thème</li>
+                        <li>Page de détail d'article</li>
+                        <li>Partage sur réseaux sociaux</li>
+                        <li>Mise en favoris</li>
+                        <li>Recherche par mots-clés</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="screen-card">
+                <div class="screen-header">7. Fanzones</div>
+                <div class="screen-body">
+                    <ul>
+                        <li>Liste des fanzones officielles</li>
+                        <li>Localisation par ville</li>
+                        <li>Horaires et capacité</li>
+                        <li>Lien Google Maps intégré</li>
+                        <li>Photos et ambiance</li>
+                        <li>Événements programmés</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="screen-card">
+                <div class="screen-header">8. Billetterie</div>
+                <div class="screen-body">
+                    <ul>
+                        <li>Catégories de billets</li>
+                        <li>Tarifs indicatifs</li>
+                        <li>Bouton "Acheter" vers site CAF</li>
+                        <li>WebView intégrée ou navigateur externe</li>
+                        <li>Informations pratiques</li>
+                        <li>FAQ billetterie</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="screen-card">
+                <div class="screen-header">9. Analyse de Sentiment</div>
+                <div class="screen-body">
+                    <ul>
+                        <li>Graphique positif/neutre/négatif</li>
+                        <li>Évolution temporelle</li>
+                        <li>Filtrage par équipe</li>
+                        <li>Top hashtags et mots-clés</li>
+                        <li>Comparaison entre équipes</li>
+                        <li>Mode démo avec données simulées</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="screen-card">
+                <div class="screen-header">10. Profil & Paramètres</div>
+                <div class="screen-body">
+                    <ul>
+                        <li>Informations utilisateur</li>
+                        <li>Équipe favorite</li>
+                        <li>Langue (FR/EN)</li>
+                        <li>Choix de la voix TTS</li>
+                        <li>Notifications</li>
+                        <li>Déconnexion et gestion du compte</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="ia" class="section">
+        <h2 class="section-title"><span class="number">5</span> Module Intelligence Artificielle</h2>
+
+        <h3>Architecture RAG (Retrieval-Augmented Generation)</h3>
+        <p>
+            Le module IA repose sur une architecture RAG qui permet au modèle de langue (Gemini)
+            de répondre avec des données fraîches provenant des APIs, évitant ainsi les hallucinations
+            et garantissant la fiabilité des informations.
+        </p>
+
+        <div class="architecture-diagram">
+            <pre>
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                           FLUX DE TRAITEMENT RAG                              │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│   ┌─────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐   │
+│   │  User   │────▶│  Analyse    │────▶│  Function   │────▶│  Appel API  │   │
+│   │  Query  │     │  Intention  │     │  Calling    │     │  (Football/ │   │
+│   └─────────┘     │  (Gemini)   │     │  Décision   │     │   News...)  │   │
+│                   └─────────────┘     └─────────────┘     └──────┬──────┘   │
+│                                                                   │          │
+│   ┌─────────┐     ┌─────────────┐     ┌─────────────┐            │          │
+│   │ Réponse │◀────│  Génération │◀────│ Contexte +  │◀───────────┘          │
+│   │ Finale  │     │  (Gemini)   │     │ Données API │                       │
+│   └─────────┘     └─────────────┘     └─────────────┘                       │
+│                                                                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+            </pre>
+        </div>
+
+        <h3>Function Calling - Fonctions Disponibles</h3>
+        <p>
+            Le LLM dispose d'un ensemble de fonctions qu'il peut déclencher automatiquement
+            selon l'intention détectée dans la requête utilisateur :
+        </p>
+
+        <table class="api-table">
+            <thead>
+                <tr>
+                    <th>Fonction</th>
+                    <th>Paramètres</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>getUpcomingMatches</code></td>
+                    <td>date?, team?, group?, stadium?</td>
+                    <td>Récupère les matchs à venir selon les filtres</td>
+                </tr>
+                <tr>
+                    <td><code>getMatchResults</code></td>
+                    <td>date?, team?, group?</td>
+                    <td>Récupère les résultats des matchs terminés</td>
+                </tr>
+                <tr>
+                    <td><code>getTeamInfo</code></td>
+                    <td>teamName (requis)</td>
+                    <td>Informations détaillées sur une équipe</td>
+                </tr>
+                <tr>
+                    <td><code>getStandings</code></td>
+                    <td>group (requis)</td>
+                    <td>Classement d'un groupe spécifique</td>
+                </tr>
+                <tr>
+                    <td><code>getNews</code></td>
+                    <td>query?, fromDate?, limit?</td>
+                    <td>Actualités CAN 2025 depuis NewsAPI</td>
+                </tr>
+                <tr>
+                    <td><code>getSentimentSummary</code></td>
+                    <td>team?, dateRange?</td>
+                    <td>Analyse de sentiment des supporters</td>
+                </tr>
+                <tr>
+                    <td><code>getFanzones</code></td>
+                    <td>city?</td>
+                    <td>Liste des fanzones par ville</td>
+                </tr>
+                <tr>
+                    <td><code>getStadiumInfo</code></td>
+                    <td>stadiumName?</td>
+                    <td>Informations sur un stade</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Prompt Système</h3>
+        <div class="code-block">
+            <code>
+Tu es l'assistant officiel de la CAN 2025 Maroc. Tu aides les supporters
+à obtenir des informations sur le tournoi : matchs, équipes, classements,
+stades, fanzones, actualités et billetterie.
+
+RÈGLES IMPORTANTES :
+1. Réponds TOUJOURS en français sauf si l'utilisateur parle anglais
+2. Utilise les fonctions disponibles pour obtenir des données à jour
+3. Cite TOUJOURS tes sources (ex: "Source: API-Football")
+4. Si tu ne trouves pas l'information, dis-le honnêtement
+5. Pour la billetterie, redirige vers le site officiel CAF
+6. Reste factuel et évite les pronostics sur les résultats futurs
+7. Sois enthousiaste mais professionnel
+
+CONTEXTE CAN 2025 :
+- Dates : Décembre 2025 - Janvier 2026
+- Pays hôte : Maroc
+- 24 équipes participantes
+- 6 villes hôtes : Casablanca, Rabat, Marrakech, Fès, Tanger, Agadir
+            </code>
+        </div>
+
+        <h3>Exemples d'Interactions</h3>
+        <div class="highlight-box gold">
+            <strong>Exemple 1 - Match du jour :</strong><br>
+            <em>User:</em> "Quels sont les matchs aujourd'hui ?"<br>
+            <em>IA:</em> Appelle <code>getUpcomingMatches(date: "2025-12-21")</code> → Génère réponse avec données API
+        </div>
+
+        <div class="highlight-box gold">
+            <strong>Exemple 2 - Classement :</strong><br>
+            <em>User:</em> "Donne-moi le classement du groupe A"<br>
+            <em>IA:</em> Appelle <code>getStandings(group: "A")</code> → Affiche tableau formaté
+        </div>
+
+        <div class="highlight-box gold">
+            <strong>Exemple 3 - Actualités :</strong><br>
+            <em>User:</em> "Des news sur le Maroc ?"<br>
+            <em>IA:</em> Appelle <code>getNews(query: "Maroc CAN 2025")</code> → Liste les articles récents
+        </div>
+    </section>
+
+    <section id="apis" class="section">
+        <h2 class="section-title"><span class="number">6</span> Intégration des APIs</h2>
+
+        <h3>APIs Externes Utilisées</h3>
+
+        <div class="tech-stack">
+            <div class="tech-card">
+                <h4>API-Football (apifootball.com)</h4>
+                <p>
+                    Source principale pour les données football : matchs, résultats, classements,
+                    statistiques des équipes et joueurs. Plan gratuit disponible avec limitations.
+                </p>
+            </div>
+            <div class="tech-card">
+                <h4>NewsAPI (newsapi.org)</h4>
+                <p>
+                    Agrégateur d'actualités pour récupérer les articles liés à la CAN 2025.
+                    Recherche par mots-clés et filtrage par date.
+                </p>
+            </div>
+            <div class="tech-card">
+                <h4>Google Gemini AI</h4>
+                <p>
+                    Modèle de langage pour le chatbot et la génération de résumés.
+                    Accès via Google AI Studio avec API key.
+                </p>
+            </div>
+        </div>
+
+        <h3>Stratégie pour l'Analyse de Sentiment</h3>
+        <p>
+            L'analyse de sentiment représente un défi technique particulier. Voici l'approche retenue
+            pour garantir une fonctionnalité présentable :
+        </p>
+
+        <div class="highlight-box">
+            <strong>Approche Hybride :</strong>
+            <ol style="margin-top: 10px; margin-bottom: 0;">
+                <li><strong>Mode Production :</strong> Intégration Twitter/X API (si accès disponible) ou YouTube Data API pour récupérer des commentaires, puis classification via Gemini</li>
+                <li><strong>Mode Démo :</strong> Base de données locale de tweets/commentaires pré-collectés, mise à jour périodiquement, avec classification en temps réel</li>
+            </ol>
+            <p style="margin-top: 15px; margin-bottom: 0;">
+                Le mode démo garantit une présentation fonctionnelle même sans accès API social.
+                Les données simulées sont réalistes et représentatives.
+            </p>
+        </div>
+
+        <h3>Gestion des Clés API</h3>
+        <div class="warning-box">
+            <span class="icon">🔐</span>
+            <div>
+                <strong>Sécurité des Clés API :</strong>
+                <p style="margin-top: 10px;">
+                    Les clés API ne doivent jamais être exposées dans le code client. Solution recommandée :
+                </p>
+                <ul style="margin-top: 10px; margin-bottom: 0;">
+                    <li><strong>Option A (Recommandée) :</strong> Backend proxy via Firebase Cloud Functions - les appels API passent par un serveur intermédiaire qui détient les clés</li>
+                    <li><strong>Option B (Développement) :</strong> Fichier .env avec restrictions de domaine côté API - acceptable pour le développement mais pas pour la production</li>
+                </ul>
+            </div>
+        </div>
+
+        <h3>Schéma des Modèles de Données</h3>
+        <div class="code-block">
+            <code>
+<span class="comment">// Modèle Match</span>
+<span class="keyword">class</span> <span class="function">Match</span> {
+  <span class="keyword">final</span> String id;
+  <span class="keyword">final</span> Team homeTeam;
+  <span class="keyword">final</span> Team awayTeam;
+  <span class="keyword">final</span> DateTime dateTime;
+  <span class="keyword">final</span> String stadium;
+  <span class="keyword">final</span> String city;
+  <span class="keyword">final</span> String? score;
+  <span class="keyword">final</span> MatchStatus status;
+  <span class="keyword">final</span> String group;
+}
+
+<span class="comment">// Modèle Team</span>
+<span class="keyword">class</span> <span class="function">Team</span> {
+  <span class="keyword">final</span> String id;
+  <span class="keyword">final</span> String name;
+  <span class="keyword">final</span> String code;
+  <span class="keyword">final</span> String flagUrl;
+  <span class="keyword">final</span> String group;
+}
+
+<span class="comment">// Modèle NewsArticle</span>
+<span class="keyword">class</span> <span class="function">NewsArticle</span> {
+  <span class="keyword">final</span> String title;
+  <span class="keyword">final</span> String description;
+  <span class="keyword">final</span> String content;
+  <span class="keyword">final</span> String url;
+  <span class="keyword">final</span> String? imageUrl;
+  <span class="keyword">final</span> DateTime publishedAt;
+  <span class="keyword">final</span> String source;
+}
+
+<span class="comment">// Modèle SentimentReport</span>
+<span class="keyword">class</span> <span class="function">SentimentReport</span> {
+  <span class="keyword">final</span> String teamId;
+  <span class="keyword">final</span> DateTime date;
+  <span class="keyword">final</span> <span class="keyword">double</span> positivePercent;
+  <span class="keyword">final</span> <span class="keyword">double</span> neutralPercent;
+  <span class="keyword">final</span> <span class="keyword">double</span> negativePercent;
+  <span class="keyword">final</span> List&lt;String&gt; topKeywords;
+}
+
+<span class="comment">// Modèle FanZone</span>
+<span class="keyword">class</span> <span class="function">FanZone</span> {
+  <span class="keyword">final</span> String name;
+  <span class="keyword">final</span> String city;
+  <span class="keyword">final</span> String address;
+  <span class="keyword">final</span> <span class="keyword">double</span> latitude;
+  <span class="keyword">final</span> <span class="keyword">double</span> longitude;
+  <span class="keyword">final</span> String? capacity;
+  <span class="keyword">final</span> String? openingHours;
+}
+            </code>
+        </div>
+    </section>
+
+    <section id="securite" class="section">
+        <h2 class="section-title"><span class="number">7</span> Sécurité et Bonnes Pratiques</h2>
+
+        <h3>Mesures de Sécurité Implémentées</h3>
+        <div class="feature-list">
+            <div class="feature-item">
+                <span class="icon">🔐</span>
+                <span class="text"><strong>Authentification Firebase</strong> - Gestion sécurisée des sessions utilisateur</span>
+            </div>
+            <div class="feature-item">
+                <span class="icon">🔑</span>
+                <span class="text"><strong>Clés API Sécurisées</strong> - Proxy backend pour masquer les credentials</span>
+            </div>
+            <div class="feature-item">
+                <span class="icon">🛡️</span>
+                <span class="text"><strong>Validation des Entrées</strong> - Sanitization des inputs utilisateur</span>
+            </div>
+            <div class="feature-item">
+                <span class="icon">📡</span>
+                <span class="text"><strong>HTTPS Obligatoire</strong> - Toutes les communications chiffrées</span>
+            </div>
+            <div class="feature-item">
+                <span class="icon">⏱️</span>
+                <span class="text"><strong>Rate Limiting</strong> - Protection contre les abus d'API</span>
+            </div>
+            <div class="feature-item">
+                <span class="icon">💾</span>
+                <span class="text"><strong>Cache Sécurisé</strong> - Données sensibles non persistées localement</span>
+            </div>
+        </div>
+
+        <h3>Bonnes Pratiques de Développement</h3>
+        <ul>
+            <li><strong>Typage strict :</strong> Utilisation complète du système de types Dart, pas de dynamic</li>
+            <li><strong>Null safety :</strong> Gestion explicite des valeurs nullables</li>
+            <li><strong>Gestion d'erreurs :</strong> Try-catch systématique avec messages utilisateur appropriés</li>
+            <li><strong>Logging :</strong> Traces de debug en développement, logs structurés en production</li>
+            <li><strong>Tests :</strong> Couverture minimale de 70% sur la logique métier</li>
+            <li><strong>Code review :</strong> Revue systématique avant merge</li>
+        </ul>
+    </section>
+
+    <section id="phases" class="section">
+        <h2 class="section-title"><span class="number">8</span> Plan de Développement</h2>
+
+        <h3>Approche Itérative</h3>
+        <p>
+            Le développement suit une approche MVP (Minimum Viable Product) avec des itérations
+            successives. Chaque phase produit un livrable fonctionnel et testable.
+        </p>
+
+        <div class="phase-timeline">
+            <div class="phase-item">
+                <span class="duration">Phase 1 - Fondations</span>
+                <h4>Restructuration et Architecture</h4>
+                <ul>
+                    <li>Migration vers Clean Architecture</li>
+                    <li>Mise en place de Riverpod pour la gestion d'état</li>
+                    <li>Configuration de GoRouter pour la navigation</li>
+                    <li>Création des modèles de données typés</li>
+                    <li>Setup du client HTTP (Dio) avec intercepteurs</li>
+                    <li>Configuration des environnements (dev/prod)</li>
+                </ul>
+            </div>
+
+            <div class="phase-item">
+                <span class="duration">Phase 2 - MVP Core</span>
+                <h4>Fonctionnalités Essentielles</h4>
+                <ul>
+                    <li>Refonte de l'écran d'accueil (Dashboard)</li>
+                    <li>Intégration API-Football (matchs, résultats, classements)</li>
+                    <li>Intégration NewsAPI (actualités)</li>
+                    <li>Écran des matchs à venir avec filtres</li>
+                    <li>Écran des actualités</li>
+                    <li>Écran billetterie avec redirection CAF</li>
+                </ul>
+            </div>
+
+            <div class="phase-item">
+                <span class="duration">Phase 3 - Intelligence Artificielle</span>
+                <h4>Chatbot et Fonctions IA</h4>
+                <ul>
+                    <li>Intégration Google Gemini AI</li>
+                    <li>Implémentation du function calling</li>
+                    <li>Interface chatbot complète</li>
+                    <li>Génération de résumés de matchs</li>
+                    <li>Gestion du contexte conversationnel</li>
+                    <li>Citations des sources dans les réponses</li>
+                </ul>
+            </div>
+
+            <div class="phase-item">
+                <span class="duration">Phase 4 - Avatar Vocal</span>
+                <h4>Interaction Vocale</h4>
+                <ul>
+                    <li>Intégration Speech-to-Text (mobile + web)</li>
+                    <li>Intégration Text-to-Speech (mobile + web)</li>
+                    <li>Interface avatar avec animations</li>
+                    <li>Mode conversation continue</li>
+                    <li>Gestion des fallbacks multiplateforme</li>
+                </ul>
+            </div>
+
+            <div class="phase-item">
+                <span class="duration">Phase 5 - Sentiment & Polish</span>
+                <h4>Analyse de Sentiment et Finitions</h4>
+                <ul>
+                    <li>Module d'analyse de sentiment</li>
+                    <li>Graphiques et visualisations</li>
+                    <li>Mode démo avec données simulées</li>
+                    <li>Optimisations de performance</li>
+                    <li>Tests unitaires et d'intégration</li>
+                    <li>Corrections de bugs et polish UI</li>
+                </ul>
+            </div>
+
+            <div class="phase-item">
+                <span class="duration">Phase 6 - Déploiement</span>
+                <h4>Mise en Production</h4>
+                <ul>
+                    <li>Configuration Firebase Cloud Functions</li>
+                    <li>Build de production (Android APK, iOS IPA, Web)</li>
+                    <li>Tests sur devices réels</li>
+                    <li>Documentation utilisateur</li>
+                    <li>Préparation de la démo</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="structure" class="section">
+        <h2 class="section-title"><span class="number">9</span> Structure du Projet</h2>
+
+        <h3>Arborescence des Dossiers</h3>
+        <div class="architecture-diagram">
+            <pre>
+lib/
+├── main.dart                      # Point d'entrée
+├── app.dart                       # Configuration MaterialApp
+├── firebase_options.dart          # Config Firebase
+│
+├── core/                          # Éléments partagés
+│   ├── constants/
+│   │   ├── api_constants.dart     # URLs, endpoints
+│   │   ├── app_constants.dart     # Constantes générales
+│   │   └── theme_constants.dart   # Couleurs, styles
+│   ├── errors/
+│   │   ├── exceptions.dart        # Exceptions custom
+│   │   └── failures.dart          # Classes d'erreur
+│   ├── network/
+│   │   ├── dio_client.dart        # Client HTTP configuré
+│   │   └── api_interceptor.dart   # Intercepteurs
+│   ├── router/
+│   │   └── app_router.dart        # Configuration GoRouter
+│   └── utils/
+│       ├── date_utils.dart
+│       └── string_utils.dart
+│
+├── features/                      # Fonctionnalités par module
+│   ├── auth/
+│   │   ├── data/
+│   │   │   ├── repositories/
+│   │   │   └── datasources/
+│   │   ├── domain/
+│   │   │   ├── entities/
+│   │   │   ├── repositories/
+│   │   │   └── usecases/
+│   │   └── presentation/
+│   │       ├── screens/
+│   │       ├── widgets/
+│   │       └── providers/
+│   │
+│   ├── matches/
+│   │   ├── data/
+│   │   │   ├── models/
+│   │   │   │   └── match_model.dart
+│   │   │   ├── repositories/
+│   │   │   │   └── match_repository_impl.dart
+│   │   │   └── datasources/
+│   │   │       └── football_api_datasource.dart
+│   │   ├── domain/
+│   │   │   ├── entities/
+│   │   │   │   └── match.dart
+│   │   │   ├── repositories/
+│   │   │   │   └── match_repository.dart
+│   │   │   └── usecases/
+│   │   │       ├── get_upcoming_matches.dart
+│   │   │       └── get_match_results.dart
+│   │   └── presentation/
+│   │       ├── screens/
+│   │       │   ├── matches_screen.dart
+│   │       │   └── match_detail_screen.dart
+│   │       ├── widgets/
+│   │       │   └── match_card.dart
+│   │       └── providers/
+│   │           └── matches_provider.dart
+│   │
+│   ├── news/
+│   │   └── [structure similaire]
+│   │
+│   ├── chatbot/
+│   │   ├── data/
+│   │   │   ├── models/
+│   │   │   │   └── chat_message_model.dart
+│   │   │   └── services/
+│   │   │       └── gemini_service.dart
+│   │   ├── domain/
+│   │   │   ├── entities/
+│   │   │   └── usecases/
+│   │   │       └── send_message.dart
+│   │   └── presentation/
+│   │       ├── screens/
+│   │       │   └── chatbot_screen.dart
+│   │       ├── widgets/
+│   │       │   ├── message_bubble.dart
+│   │       │   └── suggestion_chips.dart
+│   │       └── providers/
+│   │           └── chat_provider.dart
+│   │
+│   ├── avatar/
+│   │   └── [structure similaire]
+│   │
+│   ├── sentiment/
+│   │   └── [structure similaire]
+│   │
+│   ├── fanzones/
+│   │   └── [structure similaire]
+│   │
+│   ├── tickets/
+│   │   └── [structure similaire]
+│   │
+│   └── home/
+│       └── presentation/
+│           ├── screens/
+│           │   └── home_screen.dart
+│           └── widgets/
+│               ├── stats_card.dart
+│               └── quick_access_grid.dart
+│
+└── shared/                        # Widgets réutilisables
+    ├── widgets/
+    │   ├── app_button.dart
+    │   ├── app_text_field.dart
+    │   ├── loading_indicator.dart
+    │   └── error_widget.dart
+    └── extensions/
+        └── context_extensions.dart
+            </pre>
+        </div>
+    </section>
+
+    <section id="livrables" class="section">
+        <h2 class="section-title"><span class="number">10</span> Livrables Attendus</h2>
+
+        <h3>Code Source</h3>
+        <ul>
+            <li>Application Flutter complète et fonctionnelle</li>
+            <li>Code documenté avec commentaires pertinents</li>
+            <li>Tests unitaires (couverture > 70% sur la logique métier)</li>
+            <li>Configuration CI/CD (optionnel)</li>
+        </ul>
+
+        <h3>Builds</h3>
+        <ul>
+            <li><strong>Android :</strong> APK release signé</li>
+            <li><strong>iOS :</strong> Archive IPA (si compte Apple Developer disponible)</li>
+            <li><strong>Web :</strong> Build optimisé pour hébergement</li>
+        </ul>
+
+        <h3>Documentation</h3>
+        <ul>
+            <li>Ce document de spécifications techniques</li>
+            <li>Guide d'installation et de configuration</li>
+            <li>Documentation des APIs internes</li>
+        </ul>
+
+        <h3>Démonstration</h3>
+        <div class="highlight-box green">
+            <strong>Scénario de Démonstration :</strong>
+            <ol style="margin-top: 10px; margin-bottom: 0;">
+                <li><strong>Accueil :</strong> Présentation du dashboard avec statistiques en temps réel</li>
+                <li><strong>Chatbot :</strong> Conversation avec l'IA - questions sur les matchs, classements, actualités</li>
+                <li><strong>Avatar :</strong> Interaction vocale - poser une question oralement et recevoir une réponse audio</li>
+                <li><strong>Résumés :</strong> Génération d'un résumé de match par l'IA</li>
+                <li><strong>Sentiment :</strong> Visualisation des graphiques d'analyse de sentiment</li>
+                <li><strong>Billetterie :</strong> Navigation vers le site officiel CAF</li>
+            </ol>
+        </div>
+
+        <div class="success-box">
+            <h4 style="color: var(--secondary); margin-bottom: 10px;">Critères de Succès</h4>
+            <ul style="margin: 0;">
+                <li>Application stable sans crash sur les 3 plateformes</li>
+                <li>Temps de réponse du chatbot inférieur à 3 secondes</li>
+                <li>Interface utilisateur fluide (60 FPS)</li>
+                <li>Fonctionnement offline partiel (cache des dernières données)</li>
+                <li>Réponses de l'IA pertinentes et sourcées</li>
+            </ul>
+        </div>
+    </section>
+
+</div>
+
+<footer class="footer">
+    <p>Documentation Technique - CAN 2025 Morocco Application</p>
+    <p class="version">Version 1.0</p>
+    <p style="margin-top: 20px; font-size: 0.9rem;">
+        Projet de Stage - Application Flutter avec Intelligence Artificielle
+    </p>
+</footer>
+
+</body>
+</html>

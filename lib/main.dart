@@ -1,54 +1,98 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
-import 'screens/afcon_welcome_page.dart';
-import 'screens/login_page.dart';
-import 'screens/register_page.dart';
-import 'screens/forgot_password_page.dart';
-import 'screens/afcon_home_page.dart';
-import 'screens/fanzone_page.dart';
-import 'screens/stadiums_page.dart';
-import 'screens/buy_tickets_page.dart';
-import 'screens/afcon_history_page.dart';
-import 'screens/currency_converter_page.dart';
+import 'core/router/app_router.dart';
+import 'core/theme/app_theme.dart';
+import 'core/constants/api_constants.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Charger les variables d'environnement
+  await dotenv.load(fileName: ".env");
+  
+  // Initialiser les clés API
+  ApiKeys.initKeys({
+    'FOOTBALL_API_KEY': dotenv.env['FOOTBALL_API_KEY'] ?? '',
+    'GNEWS_API_KEY': dotenv.env['GNEWS_API_KEY'] ?? '',
+    'GROQ_API_KEY': dotenv.env['GROQ_API_KEY'] ?? '',
+  });
+
+  // Configuration de l'orientation
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  // Configuration de la barre de statut
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+    ),
+  );
+
+  // Initialisation de Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+
+  runApp(
+    const ProviderScope(
+      child: CANApp(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class CANApp extends ConsumerWidget {
+  const CANApp({super.key});
 
-  // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'AFCON CAN 2025',
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
 
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFE63946)),
-        useMaterial3: true,
-      ),
-      home: const AFCONWelcomePage(),
-      routes: {
-        '/welcome': (context) => const AFCONWelcomePage(),
-        '/login': (context) => const LoginPage(),
-        '/register': (context) => const RegisterPage(),
-        '/forgot': (context) => const ForgotPasswordPage(),
-        '/home': (context) => const AFCONHomePage(),
-        '/fanzone': (context) => const FanzonePage(),
-        '/stadiums': (context) => const StadiumsPage(),
-        '/tickets': (context) => const BuyTicketsPage(),
-        '/history': (context) => const AFCONHistoryPage(),
-        '/currency': (context) => const CurrencyConverterPage(),
+    return MaterialApp.router(
+      title: 'CAN 2025 Morocco',
+      debugShowCheckedModeBanner: false,
+
+      // Configuration du thème
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.light,
+
+      // Configuration du routeur
+      routerConfig: router,
+
+      // Delegates de localisation
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+
+      // Configuration de la localisation
+      locale: const Locale('fr', 'FR'),
+      supportedLocales: const [
+        Locale('fr', 'FR'),
+        Locale('en', 'US'),
+        Locale('ar', 'MA'),
+      ],
+
+      // Builder pour les configurations globales
+      builder: (context, child) {
+        return MediaQuery(
+          // Empêcher le redimensionnement du texte système
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.noScaling,
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
       },
     );
   }
 }
-
-// Old demo home page removed; app now opens the Moroccan welcome screen.
