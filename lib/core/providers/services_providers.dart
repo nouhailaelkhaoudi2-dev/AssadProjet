@@ -6,56 +6,47 @@ import '../../features/matches/domain/entities/match.dart';
 import '../../features/news/domain/entities/news_article.dart';
 import 'favorite_team_provider.dart';
 
-// ============== SERVICES ==============
+// Services
 
-/// Provider pour le service Football API
 final footballServiceProvider = Provider<FootballApiService>((ref) {
   return FootballApiService();
 });
 
-/// Provider pour le service News API
 final newsServiceProvider = Provider<NewsApiService>((ref) {
   return NewsApiService();
 });
 
-/// Provider pour le service Groq AI
 final groqServiceProvider = Provider<GroqService>((ref) {
   return GroqService();
 });
 
-// ============== MATCHES ==============
+// Matches
 
-/// Provider pour les matchs à venir
 final upcomingMatchesProvider = FutureProvider<List<Match>>((ref) async {
   final service = ref.watch(footballServiceProvider);
   return service.getUpcomingMatches(limit: 10);
 });
 
-/// Provider pour les matchs du jour
 final todayMatchesProvider = FutureProvider<List<Match>>((ref) async {
   final service = ref.watch(footballServiceProvider);
   return service.getTodayMatches();
 });
 
-/// Provider pour les matchs en direct
 final liveMatchesProvider = FutureProvider<List<Match>>((ref) async {
   final service = ref.watch(footballServiceProvider);
   return service.getLiveMatches();
 });
 
-/// Provider pour les résultats
 final resultsProvider = FutureProvider<List<Match>>((ref) async {
   final service = ref.watch(footballServiceProvider);
   return service.getResults(limit: 10);
 });
 
-/// Provider pour le classement
 final standingsProvider = FutureProvider<Map<String, List<Map<String, dynamic>>>>((ref) async {
   final service = ref.watch(footballServiceProvider);
   return service.getStandings();
 });
 
-/// Provider pour les matchs triés avec l'équipe favorite en priorité
 final prioritizedMatchesProvider = FutureProvider<List<Match>>((ref) async {
   final service = ref.watch(footballServiceProvider);
   final favoriteTeam = ref.watch(favoriteTeamProvider);
@@ -65,7 +56,6 @@ final prioritizedMatchesProvider = FutureProvider<List<Match>>((ref) async {
     return matches.take(10).toList();
   }
   
-  // Séparer les matchs de l'équipe favorite
   final favoriteMatches = matches.where((m) =>
     m.homeTeam.code == favoriteTeam.code ||
     m.awayTeam.code == favoriteTeam.code
@@ -76,11 +66,9 @@ final prioritizedMatchesProvider = FutureProvider<List<Match>>((ref) async {
     m.awayTeam.code != favoriteTeam.code
   ).toList();
   
-  // Retourner les matchs de l'équipe favorite d'abord
   return [...favoriteMatches, ...otherMatches].take(10).toList();
 });
 
-/// Provider pour vérifier si l'équipe favorite joue aujourd'hui
 final favoriteTeamPlaysTodayProvider = FutureProvider<Match?>((ref) async {
   final service = ref.watch(footballServiceProvider);
   final favoriteTeam = ref.watch(favoriteTeamProvider);
@@ -99,14 +87,12 @@ final favoriteTeamPlaysTodayProvider = FutureProvider<Match?>((ref) async {
   }
 });
 
-// ============== NEWS ==============
+// News
 
-/// Provider pour les actualités (filtrées par équipe favorite si définie)
 final newsProvider = FutureProvider<List<NewsArticle>>((ref) async {
   final service = ref.watch(newsServiceProvider);
   final favoriteTeam = ref.watch(favoriteTeamProvider);
   
-  // Si une équipe favorite est définie, chercher les news de cette équipe
   if (favoriteTeam != null) {
     return service.getNews(
       query: '${favoriteTeam.name} football CAN 2025',
@@ -114,23 +100,19 @@ final newsProvider = FutureProvider<List<NewsArticle>>((ref) async {
     );
   }
   
-  // Sinon, actualités générales CAN 2025
   return service.getNews(pageSize: 20);
 });
 
-/// Provider pour les headlines sportifs
 final sportsHeadlinesProvider = FutureProvider<List<NewsArticle>>((ref) async {
   final service = ref.watch(newsServiceProvider);
   return service.getSportsHeadlines();
 });
 
-/// Provider pour la recherche d'articles par équipe
 final teamNewsProvider = FutureProvider.family<List<NewsArticle>, String>((ref, teamName) async {
   final service = ref.watch(newsServiceProvider);
   return service.searchByTeam(teamName);
 });
 
-/// Provider pour les news de l'équipe favorite uniquement
 final favoriteTeamNewsProvider = FutureProvider<List<NewsArticle>>((ref) async {
   final service = ref.watch(newsServiceProvider);
   final favoriteTeam = ref.watch(favoriteTeamProvider);
@@ -142,9 +124,8 @@ final favoriteTeamNewsProvider = FutureProvider<List<NewsArticle>>((ref) async {
   return service.searchByTeam(favoriteTeam.name);
 });
 
-// ============== CHATBOT ==============
+// Chatbot
 
-/// État du chatbot
 class ChatMessage {
   final String text;
   final bool isUser;
@@ -157,17 +138,14 @@ class ChatMessage {
   }) : timestamp = timestamp ?? DateTime.now();
 }
 
-/// Notifier pour les messages du chatbot
 class ChatNotifier extends StateNotifier<List<ChatMessage>> {
   final GroqService _groqService;
 
   ChatNotifier(this._groqService) : super([]);
 
   Future<void> sendMessage(String message) async {
-    // Ajouter le message de l'utilisateur
     state = [...state, ChatMessage(text: message, isUser: true)];
 
-    // Obtenir la réponse de l'IA
     try {
       final response = await _groqService.chat(message);
       state = [...state, ChatMessage(text: response, isUser: false)];
@@ -188,16 +166,13 @@ class ChatNotifier extends StateNotifier<List<ChatMessage>> {
   }
 }
 
-/// Provider pour les messages du chatbot
-final chatMessagesProvider =
-    StateNotifierProvider<ChatNotifier, List<ChatMessage>>((ref) {
+final chatMessagesProvider = StateNotifierProvider<ChatNotifier, List<ChatMessage>>((ref) {
   final groqService = ref.watch(groqServiceProvider);
   return ChatNotifier(groqService);
 });
 
-// ============== SENTIMENT ANALYSIS ==============
+// Sentiment Analysis
 
-/// État de l'analyse de sentiment
 class SentimentState {
   final bool isLoading;
   final String? sentiment;
@@ -234,7 +209,6 @@ class SentimentState {
   }
 }
 
-/// Notifier pour l'analyse de sentiment
 class SentimentNotifier extends StateNotifier<SentimentState> {
   final GroqService _groqService;
 
@@ -276,16 +250,13 @@ class SentimentNotifier extends StateNotifier<SentimentState> {
   }
 }
 
-/// Provider pour l'analyse de sentiment
-final sentimentProvider =
-    StateNotifierProvider<SentimentNotifier, SentimentState>((ref) {
+final sentimentProvider = StateNotifierProvider<SentimentNotifier, SentimentState>((ref) {
   final groqService = ref.watch(groqServiceProvider);
   return SentimentNotifier(groqService);
 });
 
-// ============== MATCH SUMMARY ==============
+// Match Summary
 
-/// Provider pour générer un résumé de match
 final matchSummaryProvider = FutureProvider.family<String, Map<String, dynamic>>((ref, params) async {
   final groqService = ref.watch(groqServiceProvider);
   return groqService.generateMatchSummary(

@@ -55,7 +55,6 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
 
   Future<void> _initTts() async {
     try {
-      // Callbacks d'abord
       _tts.setStartHandler(() {
         if (mounted) setState(() => _isSpeaking = true);
       });
@@ -69,20 +68,17 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
       });
 
       _tts.setErrorHandler((msg) {
-        debugPrint('❌ Erreur TTS: $msg');
+        debugPrint('TTS error: $msg');
         if (mounted) setState(() => _isSpeaking = false);
       });
 
-      // Configuration de base - la langue fr-FR forcera une voix française
       await _tts.setLanguage('fr-FR');
       await _tts.setSpeechRate(0.9);
       await _tts.setVolume(1.0);
       await _tts.setPitch(1.0);
 
-      // Attendre un peu que les voix se chargent (problème Chrome)
       await Future.delayed(const Duration(milliseconds: 500));
       
-      // Essayer de charger les voix plusieurs fois
       List<dynamic>? voiceList;
       for (int i = 0; i < 5; i++) {
         final voices = await _tts.getVoices;
@@ -94,69 +90,46 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
       }
 
       if (voiceList != null && voiceList.isNotEmpty) {
-        debugPrint('════════════════════════════════════════');
-        debugPrint('🎤 VOIX DISPONIBLES (${voiceList.length} total):');
-        
-        for (var v in voiceList) {
-          final name = v['name']?.toString() ?? 'unknown';
-          final locale = v['locale']?.toString() ?? 'unknown';
-          debugPrint('  • $name | $locale');
-        }
-        
-        // Chercher les voix françaises
         final frenchVoices = voiceList.where((voice) {
           final locale = voice['locale']?.toString().toLowerCase() ?? '';
           final name = voice['name']?.toString().toLowerCase() ?? '';
           return locale.contains('fr') || name.contains('french');
         }).toList();
         
-        debugPrint('🇫🇷 VOIX FRANÇAISES: ${frenchVoices.length}');
-        
         if (frenchVoices.isNotEmpty) {
-          // Priorité aux voix MASCULINES françaises
           dynamic selectedVoice;
           
-          // 1. Henri (voix Neural Microsoft masculine - la meilleure)
+          // Voix masculines en priorité
           selectedVoice = frenchVoices.cast<dynamic?>().firstWhere(
             (v) => v?['name']?.toString().toLowerCase().contains('henri') == true,
             orElse: () => null,
           );
           
-          // 2. Paul (voix Microsoft masculine)
           selectedVoice ??= frenchVoices.cast<dynamic?>().firstWhere(
             (v) => v?['name']?.toString().toLowerCase().contains('paul') == true,
             orElse: () => null,
           );
           
-          // 3. Google français (voix masculine)
           selectedVoice ??= frenchVoices.cast<dynamic?>().firstWhere(
             (v) => v?['name']?.toString().toLowerCase().contains('google') == true,
             orElse: () => null,
           );
           
-          // 4. Thomas (voix masculine si disponible)
           selectedVoice ??= frenchVoices.cast<dynamic?>().firstWhere(
             (v) => v?['name']?.toString().toLowerCase().contains('thomas') == true,
             orElse: () => null,
           );
           
-          // Fallback: première voix française disponible
           selectedVoice ??= frenchVoices.first;
-          
-          debugPrint('🔊 VOIX MASCULINE SÉLECTIONNÉE: ${selectedVoice['name']}');
           
           await _tts.setVoice({
             'name': selectedVoice['name'],
             'locale': selectedVoice['locale'],
           });
         }
-        debugPrint('════════════════════════════════════════');
-      } else {
-        debugPrint('⚠️ Aucune voix trouvée - utilisation de la voix par défaut');
       }
-
     } catch (e) {
-      debugPrint('❌ Erreur init TTS: $e');
+      debugPrint('TTS init error: $e');
     }
   }
 
@@ -201,7 +174,6 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
     setState(() => _isListening = false);
   }
 
-  /// Nettoie le texte des emojis pour le TTS
   String _cleanTextForTts(String text) {
     final emojiRegex = RegExp(
       r'[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|'
@@ -220,19 +192,13 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
 
     try {
       final response = await _groqService.chat(query);
+      setState(() => _response = response);
 
-      setState(() {
-        _response = response;
-      });
-
-      // Nettoyer et parler
       final cleanedResponse = _cleanTextForTts(response);
       await _tts.speak(cleanedResponse);
     } catch (e) {
       const fallbackResponse = 'Désolé, je n\'ai pas pu traiter votre demande.';
-      setState(() {
-        _response = fallbackResponse;
-      });
+      setState(() => _response = fallbackResponse);
       await _tts.speak(fallbackResponse);
     }
   }
@@ -263,12 +229,10 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
       ),
       body: Column(
         children: [
-          // Avatar animé
           Expanded(
             flex: 3,
             child: Stack(
               children: [
-                // Fond avec effet de glow
                 Center(
                   child: AnimatedBuilder(
                     animation: _pulseAnimation,
@@ -292,17 +256,13 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
                     },
                   ),
                 ),
-
-                // Avatar - Mascotte officielle CAN 2025
                 Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Mascotte avec animations
                       AnimatedBuilder(
                         animation: _pulseAnimation,
                         builder: (context, child) {
-                          // Animation de rebond quand parle
                           final bounceOffset = _isSpeaking 
                               ? math.sin(_pulseController.value * math.pi * 4) * 5
                               : 0.0;
@@ -335,7 +295,6 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
                         ),
                       ),
                       const SizedBox(height: 16),
-                      // Label avec état
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -376,12 +335,9 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
                     ],
                   ),
                 ),
-
               ],
             ),
           ),
-
-          // Zone de conversation
           Expanded(
             flex: 2,
             child: Container(
@@ -394,7 +350,6 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
               ),
               child: Column(
                 children: [
-                  // Status
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     decoration: BoxDecoration(
@@ -425,10 +380,7 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 12),
-
-                  // Messages
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
@@ -454,8 +406,6 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
               ),
             ),
           ),
-
-          // Bouton micro
           Padding(
             padding: const EdgeInsets.only(bottom: 32, top: 8),
             child: GestureDetector(
@@ -491,8 +441,6 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
               ),
             ),
           ),
-
-          // Instructions
           Padding(
             padding: const EdgeInsets.only(bottom: 24),
             child: Text(

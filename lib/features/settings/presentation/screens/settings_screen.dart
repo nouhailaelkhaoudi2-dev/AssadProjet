@@ -26,91 +26,8 @@ class SettingsScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Avatar et nom avec équipe favorite
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        favoriteTeam?.flagEmoji ?? 
-                          (user?.displayName?.isNotEmpty == true
-                              ? user!.displayName![0].toUpperCase()
-                              : '👤'),
-                        style: const TextStyle(
-                          fontSize: 32,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    user?.displayName ?? 'Invité',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  if (user?.email != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      user!.email!,
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                  if (favoriteTeam != null) ...[
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(favoriteTeam.flagEmoji, style: const TextStyle(fontSize: 18)),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Supporter ${favoriteTeam.name}',
-                            style: const TextStyle(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-
+            _buildProfileHeader(user, favoriteTeam),
             const SizedBox(height: 24),
-
-            // Préférences
             _buildSection(
               title: 'Préférences',
               children: [
@@ -139,10 +56,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 16),
-
-            // Notifications
             _buildSection(
               title: 'Notifications',
               children: [
@@ -166,10 +80,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 16),
-
-            // Autre
             _buildSection(
               title: 'Autre',
               children: [
@@ -191,30 +102,83 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 24),
-
-            // Déconnexion
-            if (user != null)
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () => _signOut(context),
-                  icon: const Icon(Icons.logout, color: AppColors.error),
-                  label: const Text(
-                    'Se déconnecter',
-                    style: TextStyle(color: AppColors.error),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.error),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                ),
-              ),
-
+            if (user != null) _buildLogoutButton(context),
             const SizedBox(height: 32),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildProfileHeader(User? user, Team? favoriteTeam) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              gradient: AppColors.primaryGradient,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                favoriteTeam?.flagEmoji ?? 
+                  (user?.displayName?.isNotEmpty == true
+                      ? user!.displayName![0].toUpperCase()
+                      : '👤'),
+                style: const TextStyle(
+                  fontSize: 32,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            user?.displayName ?? 'Invité',
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          if (user?.email != null) ...[
+            const SizedBox(height: 4),
+            Text(user!.email!, style: const TextStyle(color: AppColors.textSecondary)),
+          ],
+          if (favoriteTeam != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(favoriteTeam.flagEmoji, style: const TextStyle(fontSize: 18)),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Supporter ${favoriteTeam.name}',
+                    style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -246,11 +210,24 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ],
           ),
-          child: Column(
-            children: children,
-          ),
+          child: Column(children: children),
         ),
       ],
+    );
+  }
+
+  Widget _buildLogoutButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () => _signOut(context),
+        icon: const Icon(Icons.logout, color: AppColors.error),
+        label: const Text('Se déconnecter', style: TextStyle(color: AppColors.error)),
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(color: AppColors.error),
+          padding: const EdgeInsets.symmetric(vertical: 14),
+        ),
+      ),
     );
   }
 
@@ -269,7 +246,6 @@ class SettingsScreen extends ConsumerWidget {
         ),
         child: Column(
           children: [
-            // Handle
             Container(
               margin: const EdgeInsets.only(top: 12),
               width: 40,
@@ -279,18 +255,13 @@ class SettingsScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            
-            // Header
             Padding(
               padding: const EdgeInsets.all(20),
               child: Row(
                 children: [
                   const Text(
                     'Choisir votre équipe',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const Spacer(),
                   if (favoriteTeam != null)
@@ -304,8 +275,6 @@ class SettingsScreen extends ConsumerWidget {
                 ],
               ),
             ),
-            
-            // Liste des équipes par groupe
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -336,10 +305,7 @@ class SettingsScreen extends ConsumerWidget {
                               : null,
                         ),
                         child: ListTile(
-                          leading: Text(
-                            team.flagEmoji,
-                            style: const TextStyle(fontSize: 28),
-                          ),
+                          leading: Text(team.flagEmoji, style: const TextStyle(fontSize: 28)),
                           title: Text(
                             team.name,
                             style: TextStyle(
@@ -379,10 +345,7 @@ class SettingsScreen extends ConsumerWidget {
           children: [
             const Text(
               'Choisir la langue',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             ListTile(
@@ -420,9 +383,7 @@ class SettingsScreen extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
             child: const Text('Déconnexion'),
           ),
         ],
