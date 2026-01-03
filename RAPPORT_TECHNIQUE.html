@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport Technique - TikiTaka CAN 2025</title>
+    <style>
+        :root {
+            --primary: #C1272D;
+            --secondary: #006233;
+            --accent: #C4A000;
+            --bg: #f8f9fa;
+            --text: #2d3436;
+            --text-light: #636e72;
+            --card-bg: #ffffff;
+            --border: #e0e0e0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header .subtitle {
+            font-size: 1.3em;
+            opacity: 0.95;
+        }
+        
+        .header .version {
+            margin-top: 20px;
+            padding: 8px 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .toc {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .toc h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        .toc ul {
+            list-style: none;
+            columns: 2;
+        }
+        
+        .toc li {
+            padding: 8px 0;
+        }
+        
+        .toc a {
+            color: var(--text);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .toc a:hover {
+            color: var(--primary);
+        }
+        
+        .section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 35px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .section h2 {
+            color: var(--primary);
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid var(--secondary);
+        }
+        
+        .section h3 {
+            color: var(--secondary);
+            font-size: 1.3em;
+            margin: 25px 0 15px 0;
+        }
+        
+        .section p {
+            margin-bottom: 15px;
+            color: var(--text);
+        }
+        
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .tech-card {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .tech-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+        
+        .tech-card h4 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .tech-card .version {
+            font-size: 0.8em;
+            background: var(--secondary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        .tech-card p {
+            font-size: 0.95em;
+            color: var(--text-light);
+        }
+        
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            margin: 20px 0;
+        }
+        
+        .code-block .comment {
+            color: #6a9955;
+        }
+        
+        .code-block .keyword {
+            color: #569cd6;
+        }
+        
+        .code-block .string {
+            color: #ce9178;
+        }
+        
+        .code-block .function {
+            color: #dcdcaa;
+        }
+        
+        .architecture-diagram {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin: 25px 0;
+            text-align: center;
+        }
+        
+        .architecture-diagram h3 {
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .arch-flow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .arch-box {
+            background: rgba(255,255,255,0.2);
+            padding: 15px 25px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .arch-arrow {
+            font-size: 1.5em;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border-left: 5px solid var(--accent);
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
+            margin: 20px 0;
+        }
+        
+        .warning-box h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+            border-left: 5px solid #17a2b8;
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
+            margin: 20px 0;
+        }
+        
+        .info-box h4 {
+            color: #0c5460;
+            margin-bottom: 10px;
+        }
+        
+        .success-box {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border-left: 5px solid var(--secondary);
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
+            margin: 20px 0;
+        }
+        
+        .success-box h4 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+        
+        .step-list {
+            counter-reset: step-counter;
+            list-style: none;
+            padding: 0;
+        }
+        
+        .step-list li {
+            counter-increment: step-counter;
+            padding: 15px 15px 15px 60px;
+            position: relative;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .step-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .api-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .api-table th {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+        
+        .api-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .api-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .footer {
+            background: var(--text);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            margin-top: 40px;
+        }
+        
+        .footer p {
+            opacity: 0.8;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+        
+        .badge-primary { background: var(--primary); color: white; }
+        .badge-secondary { background: var(--secondary); color: white; }
+        .badge-accent { background: var(--accent); color: #333; }
+        
+        @media (max-width: 768px) {
+            .toc ul { columns: 1; }
+            .header h1 { font-size: 2em; }
+            .arch-flow { flex-direction: column; }
+            .arch-arrow { transform: rotate(90deg); }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>🦁 TikiTaka - CAN 2025</h1>
+        <p class="subtitle">Rapport Technique Complet</p>
+        <div class="version">Version 1.0.0 | Janvier 2026</div>
+    </header>
+    
+    <div class="container">
+        <nav class="toc">
+            <h2>📑 Table des Matières</h2>
+            <ul>
+                <li><a href="#overview">1. Vue d'ensemble</a></li>
+                <li><a href="#architecture">2. Architecture</a></li>
+                <li><a href="#technologies">3. Technologies utilisées</a></li>
+                <li><a href="#ai">4. Intelligence Artificielle</a></li>
+                <li><a href="#apis">5. APIs externes</a></li>
+                <li><a href="#features">6. Fonctionnalités</a></li>
+                <li><a href="#setup">7. Guide d'installation</a></li>
+                <li><a href="#config">8. Configuration</a></li>
+            </ul>
+        </nav>
+        
+        <section id="overview" class="section">
+            <h2>1. Vue d'ensemble</h2>
+            <p>
+                <strong>TikiTaka</strong> est une application mobile et web développée avec Flutter, 
+                conçue pour accompagner les fans de football durant la Coupe d'Afrique des Nations 2025 
+                au Maroc. L'application intègre un assistant IA conversationnel, un avatar vocal interactif, 
+                et fournit des informations en temps réel sur les matchs, les équipes et l'actualité du tournoi.
+            </p>
+            
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>🎯 Objectif</h4>
+                    <p>Offrir une expérience personnalisée aux supporters avec des informations en temps réel et une interaction IA naturelle.</p>
+                </div>
+                <div class="tech-card">
+                    <h4>👥 Public cible</h4>
+                    <p>Fans de football africain, supporters des 24 équipes qualifiées, visiteurs du Maroc pour la CAN.</p>
+                </div>
+                <div class="tech-card">
+                    <h4>🌍 Plateformes</h4>
+                    <p>Web (Chrome, Edge), Android, iOS, Windows Desktop.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="architecture" class="section">
+            <h2>2. Architecture</h2>
+            <p>
+                L'application suit une architecture <strong>Clean Architecture</strong> avec une séparation claire 
+                des responsabilités entre les couches de présentation, domaine et données.
+            </p>
+            
+            <div class="architecture-diagram">
+                <h3>Flux de données</h3>
+                <div class="arch-flow">
+                    <div class="arch-box">👤 Utilisateur</div>
+                    <span class="arch-arrow">→</span>
+                    <div class="arch-box">🎨 UI (Flutter)</div>
+                    <span class="arch-arrow">→</span>
+                    <div class="arch-box">📦 Riverpod</div>
+                    <span class="arch-arrow">→</span>
+                    <div class="arch-box">⚙️ Services</div>
+                    <span class="arch-arrow">→</span>
+                    <div class="arch-box">🌐 APIs</div>
+                </div>
+            </div>
+            
+            <h3>Structure des dossiers</h3>
+            <div class="code-block">
+lib/
+├── core/
+│   ├── constants/      <span class="comment"># Constantes et clés API</span>
+│   ├── providers/      <span class="comment"># Providers Riverpod</span>
+│   ├── router/         <span class="comment"># Configuration GoRouter</span>
+│   ├── services/       <span class="comment"># Services API (Groq, Football, News)</span>
+│   └── theme/          <span class="comment"># Thème et couleurs</span>
+├── features/
+│   ├── avatar/         <span class="comment"># Écran avatar vocal</span>
+│   ├── chatbot/        <span class="comment"># Interface chatbot</span>
+│   ├── home/           <span class="comment"># Dashboard principal</span>
+│   ├── matches/        <span class="comment"># Liste des matchs</span>
+│   ├── news/           <span class="comment"># Actualités</span>
+│   ├── settings/       <span class="comment"># Profil utilisateur</span>
+│   └── ...
+└── main.dart
+            </div>
+        </section>
+        
+        <section id="technologies" class="section">
+            <h2>3. Technologies utilisées</h2>
+            
+            <h3>Framework principal</h3>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>Flutter <span class="version">3.9.2+</span></h4>
+                    <p>Framework UI cross-platform de Google pour créer des applications natives compilées.</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Dart <span class="version">3.9.2+</span></h4>
+                    <p>Langage de programmation optimisé pour le développement client.</p>
+                </div>
+            </div>
+            
+            <h3>Gestion d'état</h3>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>Flutter Riverpod <span class="version">2.6.1</span></h4>
+                    <p>Solution de gestion d'état réactive et testable. Gère les providers pour les services, l'état du chat et les préférences utilisateur.</p>
+                </div>
+            </div>
+            
+            <h3>Navigation</h3>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>GoRouter <span class="version">14.6.2</span></h4>
+                    <p>Routage déclaratif avec support du deep linking et navigation par URL.</p>
+                </div>
+            </div>
+            
+            <h3>Backend & Authentification</h3>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>Firebase Core <span class="version">3.8.1</span></h4>
+                    <p>SDK Firebase pour l'initialisation et la configuration.</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Firebase Auth <span class="version">5.3.4</span></h4>
+                    <p>Authentification utilisateur (email/password, Google Sign-In).</p>
+                </div>
+            </div>
+            
+            <h3>Réseau & API</h3>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>Dio <span class="version">5.7.0</span></h4>
+                    <p>Client HTTP puissant avec intercepteurs, gestion des erreurs et timeouts.</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Retrofit <span class="version">4.4.1</span></h4>
+                    <p>Générateur de code pour les clients API REST type-safe.</p>
+                </div>
+            </div>
+            
+            <h3>Fonctionnalités vocales</h3>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>Speech to Text <span class="version">7.0.0</span></h4>
+                    <p>Reconnaissance vocale pour convertir la parole en texte (support français).</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Flutter TTS <span class="version">4.2.3</span></h4>
+                    <p>Synthèse vocale Text-to-Speech avec sélection de voix françaises masculines.</p>
+                </div>
+            </div>
+            
+            <h3>Stockage local</h3>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>Shared Preferences <span class="version">2.3.4</span></h4>
+                    <p>Stockage clé-valeur pour les préférences utilisateur (équipe favorite, langue).</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Hive Flutter <span class="version">1.1.0</span></h4>
+                    <p>Base de données NoSQL légère et rapide pour le cache offline.</p>
+                </div>
+            </div>
+            
+            <h3>UI & Animations</h3>
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>Flutter Animate <span class="version">4.5.2</span></h4>
+                    <p>Animations déclaratives et effets visuels.</p>
+                </div>
+                <div class="tech-card">
+                    <h4>FL Chart <span class="version">0.69.2</span></h4>
+                    <p>Graphiques et visualisations de données.</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Cached Network Image <span class="version">3.4.1</span></h4>
+                    <p>Chargement et mise en cache d'images réseau.</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Shimmer <span class="version">3.0.0</span></h4>
+                    <p>Effets de chargement skeleton.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="ai" class="section">
+            <h2>4. Intelligence Artificielle</h2>
+            
+            <h3>Groq AI (LLM principal)</h3>
+            <p>
+                L'application utilise <strong>Groq</strong> comme service d'IA principal pour le chatbot et l'avatar vocal. 
+                Groq offre une inférence ultra-rapide grâce à son architecture LPU (Language Processing Unit).
+            </p>
+            
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>Modèle utilisé</h4>
+                    <p><strong>Llama 3.3 70B Versatile</strong> - Modèle open-source performant pour les conversations en français.</p>
+                </div>
+                <div class="tech-card">
+                    <h4>Avantages</h4>
+                    <p>Temps de réponse < 500ms, support multilingue excellent, coût abordable.</p>
+                </div>
+            </div>
+            
+            <div class="code-block">
+<span class="comment">// Configuration du service Groq (lib/core/services/groq_service.dart)</span>
+
+<span class="keyword">class</span> <span class="function">GroqService</span> {
+  <span class="keyword">static const</span> String _baseUrl = <span class="string">'https://api.groq.com/openai/v1'</span>;
+  <span class="keyword">static const</span> String _model = <span class="string">'llama-3.3-70b-versatile'</span>;
+  
+  <span class="keyword">Future</span>&lt;String&gt; <span class="function">chat</span>(String message) <span class="keyword">async</span> {
+    <span class="comment">// Appel à l'API Groq avec contexte CAN 2025</span>
+    <span class="keyword">final</span> response = <span class="keyword">await</span> _dio.post(<span class="string">'/chat/completions'</span>, data: {
+      <span class="string">'model'</span>: _model,
+      <span class="string">'messages'</span>: _conversationHistory,
+      <span class="string">'temperature'</span>: 0.7,
+      <span class="string">'max_tokens'</span>: 1024,
+    });
+    <span class="keyword">return</span> response.data[<span class="string">'choices'</span>][0][<span class="string">'message'</span>][<span class="string">'content'</span>];
+  }
+}
+            </div>
+            
+            <div class="warning-box">
+                <h4>⚠️ À propos de Google Generative AI (Gemini)</h4>
+                <p>
+                    Le package <code>google_generative_ai</code> était initialement prévu pour ce projet mais n'est 
+                    <strong>pas utilisé dans la version actuelle</strong>. Le choix s'est porté sur Groq pour les raisons suivantes :
+                </p>
+                <ul style="margin-top: 10px; margin-left: 20px;">
+                    <li>Temps de réponse plus rapides</li>
+                    <li>Meilleur rapport qualité/prix pour les quotas</li>
+                    <li>API compatible OpenAI (plus simple à intégrer)</li>
+                </ul>
+                <p style="margin-top: 10px;">
+                    Si vous souhaitez utiliser Gemini, ajoutez le package et créez un service similaire avec l'API Google.
+                </p>
+            </div>
+            
+            <h3>Fonctionnalités IA</h3>
+            <table class="api-table">
+                <thead>
+                    <tr>
+                        <th>Fonctionnalité</th>
+                        <th>Description</th>
+                        <th>Service</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Chatbot textuel</td>
+                        <td>Conversation écrite sur la CAN 2025</td>
+                        <td>GroqService.chat()</td>
+                    </tr>
+                    <tr>
+                        <td>Avatar vocal</td>
+                        <td>Interaction vocale avec TikiTaka</td>
+                        <td>GroqService + FlutterTTS</td>
+                    </tr>
+                    <tr>
+                        <td>Analyse de sentiment</td>
+                        <td>Détection du ton des messages</td>
+                        <td>GroqService.analyze()</td>
+                    </tr>
+                    <tr>
+                        <td>Résumé de match</td>
+                        <td>Génération de résumés automatiques</td>
+                        <td>GroqService.generateMatchSummary()</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <section id="apis" class="section">
+            <h2>5. APIs externes</h2>
+            
+            <table class="api-table">
+                <thead>
+                    <tr>
+                        <th>API</th>
+                        <th>Usage</th>
+                        <th>Endpoint</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>API-Football</strong></td>
+                        <td>Matchs, scores, classements en temps réel</td>
+                        <td>api-football.com</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GNews</strong></td>
+                        <td>Actualités sportives CAN 2025</td>
+                        <td>gnews.io</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Groq</strong></td>
+                        <td>IA conversationnelle (Llama 3.3)</td>
+                        <td>api.groq.com</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Firebase</strong></td>
+                        <td>Authentification utilisateurs</td>
+                        <td>firebase.google.com</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Flux d'intégration</h3>
+            <div class="code-block">
+<span class="comment">// Exemple : Récupération des matchs du jour</span>
+
+<span class="keyword">class</span> <span class="function">FootballApiService</span> {
+  <span class="keyword">Future</span>&lt;List&lt;Match&gt;&gt; <span class="function">getTodayMatches</span>() <span class="keyword">async</span> {
+    <span class="keyword">final</span> response = <span class="keyword">await</span> _dio.get(<span class="string">'/fixtures'</span>, queryParameters: {
+      <span class="string">'league'</span>: 6,           <span class="comment">// ID CAN</span>
+      <span class="string">'season'</span>: 2025,
+      <span class="string">'date'</span>: DateTime.now().toIso8601String().split(<span class="string">'T'</span>)[0],
+    });
+    <span class="keyword">return</span> _parseMatches(response.data);
+  }
+}
+            </div>
+        </section>
+        
+        <section id="features" class="section">
+            <h2>6. Fonctionnalités principales</h2>
+            
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <h4>💬 Chatbot IA</h4>
+                    <p>Assistant conversationnel spécialisé CAN 2025. Répond aux questions sur les matchs, équipes, stades et billets.</p>
+                </div>
+                <div class="tech-card">
+                    <h4>🦁 Avatar TikiTaka</h4>
+                    <p>Mascotte interactive avec reconnaissance vocale et synthèse vocale en français.</p>
+                </div>
+                <div class="tech-card">
+                    <h4>⚽ Matchs en direct</h4>
+                    <p>Scores en temps réel, calendrier des matchs, résultats et classements par groupe.</p>
+                </div>
+                <div class="tech-card">
+                    <h4>📰 Actualités</h4>
+                    <p>Fil d'actualités filtré par équipe favorite via GNews API.</p>
+                </div>
+                <div class="tech-card">
+                    <h4>❤️ Équipe favorite</h4>
+                    <p>Personnalisation de l'expérience selon l'équipe supportée (24 équipes disponibles).</p>
+                </div>
+                <div class="tech-card">
+                    <h4>🎫 Billetterie</h4>
+                    <p>Lien direct vers la billetterie officielle CAF.</p>
+                </div>
+                <div class="tech-card">
+                    <h4>🏟️ Stades</h4>
+                    <p>Informations sur les 6 stades marocains accueillant la compétition.</p>
+                </div>
+                <div class="tech-card">
+                    <h4>📊 Analyse de sentiment</h4>
+                    <p>Analyse du ton des messages (positif, négatif, neutre).</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="setup" class="section">
+            <h2>7. Guide d'installation</h2>
+            
+            <h3>Prérequis</h3>
+            <ul class="step-list">
+                <li><strong>Flutter SDK</strong> version 3.9.2 ou supérieure installé</li>
+                <li><strong>Dart SDK</strong> version 3.9.2 ou supérieure</li>
+                <li><strong>Git</strong> pour cloner le repository</li>
+                <li><strong>IDE</strong> : VS Code avec extensions Flutter ou Android Studio</li>
+                <li><strong>Chrome</strong> pour le développement web</li>
+            </ul>
+            
+            <h3>Étapes d'installation</h3>
+            <ol class="step-list">
+                <li>
+                    <strong>Cloner le repository</strong>
+                    <div class="code-block">git clone https://github.com/nouhailaelkhaoudi2-dev/AssadProjet.git
+cd AssadProjet</div>
+                </li>
+                <li>
+                    <strong>Installer les dépendances</strong>
+                    <div class="code-block">flutter pub get</div>
+                </li>
+                <li>
+                    <strong>Créer le fichier .env</strong>
+                    <div class="code-block"># Créer un fichier .env à la racine du projet
+touch .env</div>
+                </li>
+                <li>
+                    <strong>Configurer les clés API (voir section suivante)</strong>
+                </li>
+                <li>
+                    <strong>Lancer l'application</strong>
+                    <div class="code-block"><span class="comment"># Web (Chrome)</span>
+flutter run -d chrome
+
+<span class="comment"># Windows Desktop</span>
+flutter run -d windows
+
+<span class="comment"># Android</span>
+flutter run -d android</div>
+                </li>
+            </ol>
+            
+            <div class="info-box">
+                <h4>ℹ️ Mode développeur Windows</h4>
+                <p>
+                    Si vous rencontrez l'erreur "Building with plugins requires symlink support", 
+                    activez le Mode développeur dans les paramètres Windows :
+                    <br><br>
+                    <strong>Paramètres → Mise à jour et sécurité → Pour les développeurs → Mode développeur</strong>
+                </p>
+            </div>
+        </section>
+        
+        <section id="config" class="section">
+            <h2>8. Configuration des clés API</h2>
+            
+            <h3>Fichier .env</h3>
+            <p>Créez un fichier <code>.env</code> à la racine du projet avec les clés suivantes :</p>
+            
+            <div class="code-block">
+<span class="comment"># Groq AI (obligatoire pour le chatbot)</span>
+GROQ_API_KEY=votre_cle_groq
+
+<span class="comment"># API-Football (obligatoire pour les matchs)</span>
+FOOTBALL_API_KEY=votre_cle_api_football
+
+<span class="comment"># GNews (obligatoire pour les actualités)</span>
+GNEWS_API_KEY=votre_cle_gnews
+            </div>
+            
+            <h3>Obtenir les clés API</h3>
+            <table class="api-table">
+                <thead>
+                    <tr>
+                        <th>Service</th>
+                        <th>URL d'inscription</th>
+                        <th>Plan recommandé</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Groq</strong></td>
+                        <td><a href="https://console.groq.com" target="_blank">console.groq.com</a></td>
+                        <td>Gratuit (limité) ou Developer</td>
+                    </tr>
+                    <tr>
+                        <td><strong>API-Football</strong></td>
+                        <td><a href="https://www.api-football.com" target="_blank">api-football.com</a></td>
+                        <td>Pro (pour CAN 2025 saison actuelle)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>GNews</strong></td>
+                        <td><a href="https://gnews.io" target="_blank">gnews.io</a></td>
+                        <td>Gratuit (100 requêtes/jour)</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>Configuration Firebase</h3>
+            <ol class="step-list">
+                <li>Créez un projet sur <a href="https://console.firebase.google.com" target="_blank">Firebase Console</a></li>
+                <li>Activez l'authentification Email/Password</li>
+                <li>Téléchargez les fichiers de configuration :
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><code>google-services.json</code> → android/app/</li>
+                        <li><code>GoogleService-Info.plist</code> → ios/Runner/</li>
+                    </ul>
+                </li>
+                <li>Pour le web, ajoutez la configuration dans <code>web/index.html</code></li>
+            </ol>
+            
+            <div class="success-box">
+                <h4>✅ Vérification</h4>
+                <p>
+                    Une fois configuré, lancez l'application et vérifiez que :
+                </p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Le chatbot répond aux questions</li>
+                    <li>Les matchs s'affichent sur le dashboard</li>
+                    <li>Les actualités se chargent</li>
+                    <li>L'avatar parle en français</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+    
+    <footer class="footer">
+        <p><strong>TikiTaka - CAN 2025</strong></p>
+        <p>Développé avec ❤️ pour les fans de football africain</p>
+        <p style="margin-top: 15px; opacity: 0.6;">© 2025-2026 | Rapport technique généré en Janvier 2026</p>
+    </footer>
+</body>
+</html>
+
