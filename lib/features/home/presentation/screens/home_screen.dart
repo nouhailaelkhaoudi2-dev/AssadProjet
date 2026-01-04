@@ -9,10 +9,26 @@ import '../widgets/stats_card.dart';
 import '../widgets/quick_access_card.dart';
 import '../widgets/upcoming_match_card.dart';
 
-// Local state: selected location shown in the AppBar
-final selectedLocationProvider = StateProvider<String>(
-  (ref) => 'Casablanca, MA',
-);
+/// Custom clipper for concave curve at bottom of header
+class _ConcaveCurveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.lineTo(0, size.height - 30);
+    path.quadraticBezierTo(
+      size.width / 2,
+      size.height + 20,
+      size.width,
+      size.height - 30,
+    );
+    path.lineTo(size.width, 0);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+}
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -22,152 +38,15 @@ class HomeScreen extends ConsumerWidget {
     final upcomingMatchesAsync = ref.watch(prioritizedMatchesProvider);
     final favoriteTeam = ref.watch(favoriteTeamProvider);
     final favoriteTeamPlaysToday = ref.watch(favoriteTeamPlaysTodayProvider);
-    final selectedLocation = ref.watch(selectedLocationProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(
-            pinned: true,
-            backgroundColor: AppColors.surface,
-            leading: Padding(
-              padding: const EdgeInsets.only(left: 12),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(18),
-                onTap: () => context.push(AppRoutes.profile),
-                child: CircleAvatar(
-                  radius: 18,
-                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                  child: Text(
-                    favoriteTeam?.flagEmoji ?? '👤',
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                ),
-              ),
-            ),
-            titleSpacing: 0,
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                InkWell(
-                  borderRadius: BorderRadius.circular(8),
-                  onTap: () => _showLocationPicker(context, ref),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Text(
-                        'Location',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      SizedBox(width: 4),
-                      Icon(
-                        Icons.expand_more,
-                        size: 16,
-                        color: AppColors.textSecondary,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  selectedLocation,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(12),
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Aucune notification pour le moment'),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: AppColors.textSecondary.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.notifications_none,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(64),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(16),
-                        onTap: () => _showSearchSheet(context),
-                        child: Container(
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[100],
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: const Row(
-                            children: [
-                              Icon(
-                                Icons.search,
-                                color: AppColors.textSecondary,
-                              ),
-                              SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Search',
-                                  style: TextStyle(
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: () => _showFilterSheet(context, ref),
-                      child: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: const Icon(
-                          Icons.tune,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+          SliverToBoxAdapter(
+            child: ClipPath(
+              clipper: _ConcaveCurveClipper(),
+              child: Container(height: 130, color: AppColors.primary),
             ),
           ),
           SliverToBoxAdapter(
@@ -556,139 +435,5 @@ class HomeScreen extends ConsumerWidget {
 
   String _formatTime(DateTime date) {
     return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
-  }
-
-  // --- Interactions helpers ---
-  void _showLocationPicker(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        final cities = [
-          'Casablanca, MA',
-          'Rabat, MA',
-          'Marrakech, MA',
-          'Tanger, MA',
-          'Fès, MA',
-        ];
-        return ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: cities.length,
-          separatorBuilder: (_, __) => const Divider(),
-          itemBuilder: (_, i) {
-            return ListTile(
-              title: Text(cities[i]),
-              trailing: const Icon(Icons.location_on, color: AppColors.primary),
-              onTap: () {
-                ref.read(selectedLocationProvider.notifier).state = cities[i];
-                Navigator.pop(ctx);
-              },
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void _showSearchSheet(BuildContext context) {
-    final controller = TextEditingController();
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            bottom: 16 + MediaQuery.of(ctx).viewInsets.bottom,
-            top: 16,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: controller,
-                decoration: const InputDecoration(
-                  hintText: 'Rechercher équipes, matchs, stades...',
-                  prefixIcon: Icon(Icons.search),
-                ),
-                textInputAction: TextInputAction.search,
-                onSubmitted: (_) => Navigator.pop(ctx),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: const [
-                  Icon(Icons.lightbulb, color: AppColors.textSecondary),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Astuce: essayez "Maroc" ou "Stade de Marrakech"',
-                      style: TextStyle(color: AppColors.textSecondary),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  void _showFilterSheet(BuildContext context, WidgetRef ref) {
-    bool upcomingOnly = true;
-    bool todayOnly = false;
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setState) => Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Filtres',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SwitchListTile(
-                  title: const Text('Afficher uniquement les matchs à venir'),
-                  value: upcomingOnly,
-                  onChanged: (v) => setState(() => upcomingOnly = v),
-                ),
-                SwitchListTile(
-                  title: const Text(
-                    'Afficher seulement les matchs d\'aujourd\'hui',
-                  ),
-                  value: todayOnly,
-                  onChanged: (v) => setState(() => todayOnly = v),
-                ),
-                const SizedBox(height: 8),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    child: const Text('Appliquer'),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
   }
 }

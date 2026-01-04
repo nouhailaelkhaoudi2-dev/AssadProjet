@@ -39,7 +39,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
       ChatMessage.assistant(
         id: 'welcome',
         content:
-            '''Bienvenue ! Je suis TikiTaka, votre assistant IA pour la CAN 2025 Morocco.
+            '''Bienvenue ! Je suis Assad, votre assistant IA pour la CAN 2025 Morocco.
 
 Je peux vous aider avec :
 - Les matchs et résultats en temps réel

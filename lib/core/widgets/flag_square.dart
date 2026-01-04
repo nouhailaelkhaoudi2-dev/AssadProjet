@@ -67,6 +67,8 @@ class FlagSquare extends StatelessWidget {
         return CustomPaint(painter: _GabonFlagPainter());
       case 'ML':
         return CustomPaint(painter: _MaliFlagPainter());
+      case 'GH':
+        return CustomPaint(painter: _GhanaFlagPainter());
       default:
         return Container(
           alignment: Alignment.center,
@@ -472,7 +474,7 @@ class _AlgeriaFlagPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final green = Paint()..color = const Color(0xFF006233);
     final white = Paint()..color = Colors.white;
-    final red = Paint()..color = const Color(0xFFCE1126);
+    final red = Paint()..color = const Color(0xFFD21034);
 
     // Split vertically: green (hoist), white (fly)
     final stripeW = size.width / 2;
@@ -481,28 +483,34 @@ class _AlgeriaFlagPainter extends CustomPainter {
 
     // Red crescent and star centered
     final center = Offset(size.width / 2, size.height / 2);
-    final outerR = size.shortestSide * 0.22;
-    final innerR = outerR * 0.14;
+    final outerR = size.shortestSide * 0.32;
+    final innerR = outerR * 0.8;
 
-    // Crescent via two circles subtraction approximation: draw thick arc
-    final arcPaint = Paint()
-      ..color = red.color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = size.shortestSide * 0.12;
-    final rect = Rect.fromCircle(
-      center: center.translate(-size.width * 0.04, 0),
-      radius: outerR,
+    // Draw crescent using two overlapping circles
+    final crescentPath = Path();
+    // Outer circle (full moon)
+    crescentPath.addOval(Rect.fromCircle(center: center, radius: outerR));
+    // Inner circle to cut out (shifted right to create crescent)
+    final innerCenter = center.translate(outerR * 0.35, 0);
+    final cutoutPath = Path()
+      ..addOval(Rect.fromCircle(center: innerCenter, radius: innerR));
+
+    // Combine paths to create crescent
+    final crescent = Path.combine(
+      PathOperation.difference,
+      crescentPath,
+      cutoutPath,
     );
-    canvas.drawArc(rect, -math.pi * 0.25, math.pi * 1.5, false, arcPaint);
+    canvas.drawPath(crescent, red);
 
-    // Red star slightly right of crescent center
-    final starCenter = center.translate(size.width * 0.07, 0);
-    final sOuter = innerR;
-    final sInner = sOuter * 0.5;
+    // Red star to the right of crescent
+    final starCenter = center.translate(outerR * 0.55, 0);
+    final starOuter = size.shortestSide * 0.12;
+    final starInner = starOuter * 0.4;
     final star = Path();
     for (int i = 0; i < 10; i++) {
       final isOuter = i % 2 == 0;
-      final r = isOuter ? sOuter : sInner;
+      final r = isOuter ? starOuter : starInner;
       final angle = -90 + i * 36;
       final rad = angle * math.pi / 180;
       final p = starCenter + Offset(r * math.cos(rad), r * math.sin(rad));
@@ -513,7 +521,7 @@ class _AlgeriaFlagPainter extends CustomPainter {
       }
     }
     star.close();
-    canvas.drawPath(star, Paint()..color = red.color);
+    canvas.drawPath(star, red);
   }
 
   @override
@@ -599,6 +607,63 @@ class _MaliFlagPainter extends CustomPainter {
     canvas.drawRect(Rect.fromLTWH(0, 0, stripeW, size.height), green);
     canvas.drawRect(Rect.fromLTWH(stripeW, 0, stripeW, size.height), yellow);
     canvas.drawRect(Rect.fromLTWH(2 * stripeW, 0, stripeW, size.height), red);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _GhanaFlagPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final red = Paint()..color = const Color(0xFFCE1126);
+    final yellow = Paint()..color = const Color(0xFFFCD116);
+    final green = Paint()..color = const Color(0xFF006B3F);
+    final black = Paint()..color = Colors.black;
+
+    final stripeH = size.height / 3;
+
+    // Red stripe (top)
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, stripeH), red);
+    // Yellow stripe (middle)
+    canvas.drawRect(Rect.fromLTWH(0, stripeH, size.width, stripeH), yellow);
+    // Green stripe (bottom)
+    canvas.drawRect(Rect.fromLTWH(0, 2 * stripeH, size.width, stripeH), green);
+
+    // Black star in center
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.shortestSide * 0.2;
+    final path = Path();
+
+    for (int i = 0; i < 5; i++) {
+      final angle = -90 + i * 72;
+      final rad = angle * math.pi / 180;
+      final point =
+          center + Offset(radius * math.cos(rad), radius * math.sin(rad));
+      if (i == 0) {
+        path.moveTo(point.dx, point.dy);
+      } else {
+        path.lineTo(point.dx, point.dy);
+      }
+    }
+    path.close();
+
+    // Draw filled star
+    final starPath = Path();
+    final innerRadius = radius * 0.4;
+    for (int i = 0; i < 10; i++) {
+      final angle = -90 + i * 36;
+      final rad = angle * math.pi / 180;
+      final r = i.isEven ? radius : innerRadius;
+      final point = center + Offset(r * math.cos(rad), r * math.sin(rad));
+      if (i == 0) {
+        starPath.moveTo(point.dx, point.dy);
+      } else {
+        starPath.lineTo(point.dx, point.dy);
+      }
+    }
+    starPath.close();
+    canvas.drawPath(starPath, black);
   }
 
   @override

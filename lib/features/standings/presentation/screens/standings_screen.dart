@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/providers/services_providers.dart';
-import '../../../../core/widgets/back_chevron_button.dart';
 
 class StandingsScreen extends ConsumerWidget {
   const StandingsScreen({super.key});
@@ -13,10 +12,7 @@ class StandingsScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        leading: const BackChevronButton(),
-        title: const Text('Classement'),
-      ),
+      appBar: AppBar(title: const Text('Classement')),
       body: standingsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
@@ -104,8 +100,6 @@ class _GroupCard extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.emoji_events, color: Colors.white),
-                const SizedBox(width: 8),
                 Text(
                   groupName,
                   style: const TextStyle(

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../constants/api_constants.dart';
 import '../../features/matches/domain/entities/match.dart';
+import '../../features/matches/domain/entities/match_details.dart';
 import '../../features/matches/domain/entities/team.dart';
 
 /// Service pour l'API Football - Utilise uniquement l'API, pas de données de fallback
@@ -162,6 +163,77 @@ class FootballApiService {
     }
   }
 
+  /// Récupère les matchs d'une date spécifique
+  Future<List<Match>> getMatchesByDate(DateTime date) async {
+    final dateStr =
+        '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    return getMatches(date: dateStr);
+  }
+
+  /// Récupère tous les matchs de la compétition
+  Future<List<Match>> getAllMatches() async {
+    try {
+      final response = await _dio.get(
+        ApiConstants.endpointFixtures,
+        queryParameters: {
+          'league': ApiConstants.afconLeagueId,
+          'season': ApiConstants.afconSeason,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['response'] as List;
+        return data.map((json) => _parseMatch(json)).toList();
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Récupère les matchs par phase (round of 16, quarter, semi, final)
+  Future<List<Match>> getMatchesByPhase(String phase) async {
+    try {
+      final response = await _dio.get(
+        ApiConstants.endpointFixtures,
+        queryParameters: {
+          'league': ApiConstants.afconLeagueId,
+          'season': ApiConstants.afconSeason,
+          'round': phase,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['response'] as List;
+        return data.map((json) => _parseMatch(json)).toList();
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Récupère les rounds disponibles pour la compétition
+  Future<List<String>> getAvailableRounds() async {
+    try {
+      final response = await _dio.get(
+        '/fixtures/rounds',
+        queryParameters: {
+          'league': ApiConstants.afconLeagueId,
+          'season': ApiConstants.afconSeason,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['response'] as List;
+        return data.cast<String>();
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
   /// Récupère le classement
   Future<Map<String, List<Map<String, dynamic>>>> getStandings() async {
     try {
@@ -211,7 +283,7 @@ class FootballApiService {
   }
 
   /// Récupère les statistiques d'un match
-  Future<Map<String, dynamic>?> getMatchStatistics(String matchId) async {
+  Future<MatchStatistics?> getMatchStatistics(String matchId) async {
     try {
       final response = await _dio.get(
         ApiConstants.endpointStatistics,
@@ -219,12 +291,362 @@ class FootballApiService {
       );
 
       if (response.statusCode == 200) {
-        return response.data;
+        final data = response.data['response'] as List;
+        if (data.isNotEmpty) {
+          return MatchStatistics.fromJson(data);
+        }
       }
       return null;
     } catch (e) {
       return null;
     }
+  }
+
+  /// Récupère les événements d'un match (buts, cartons, remplacements)
+  Future<List<MatchEvent>> getMatchEvents(String matchId) async {
+    try {
+      final response = await _dio.get(
+        ApiConstants.endpointEvents,
+        queryParameters: {'fixture': matchId},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['response'] as List;
+        return data.map((e) => MatchEvent.fromJson(e)).toList();
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Récupère les compositions des équipes pour un match
+  Future<List<TeamLineup>> getMatchLineups(String matchId) async {
+    try {
+      final response = await _dio.get(
+        ApiConstants.endpointLineups,
+        queryParameters: {'fixture': matchId},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['response'] as List;
+        return data.map((l) => TeamLineup.fromJson(l)).toList();
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Récupère les meilleurs buteurs de la CAN 2025
+  Future<List<TopScorer>> getTopScorers({int limit = 10}) async {
+    try {
+      final response = await _dio.get(
+        ApiConstants.endpointTopScorers,
+        queryParameters: {
+          'league': ApiConstants.afconLeagueId,
+          'season': ApiConstants.afconSeason,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['response'] as List;
+        return data.take(limit).map((p) => TopScorer.fromJson(p)).toList();
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Récupère les meilleurs passeurs de la CAN 2025
+  Future<List<TopScorer>> getTopAssists({int limit = 10}) async {
+    try {
+      final response = await _dio.get(
+        ApiConstants.endpointTopAssists,
+        queryParameters: {
+          'league': ApiConstants.afconLeagueId,
+          'season': ApiConstants.afconSeason,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['response'] as List;
+        return data.take(limit).map((p) => TopScorer.fromJson(p)).toList();
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Récupère l'historique des confrontations entre deux équipes
+  Future<HeadToHead?> getHeadToHead(
+    int team1Id,
+    int team2Id, {
+    int limit = 10,
+  }) async {
+    try {
+      final response = await _dio.get(
+        ApiConstants.endpointH2H,
+        queryParameters: {'h2h': '$team1Id-$team2Id', 'last': limit},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['response'] as List;
+        if (data.isEmpty) return null;
+
+        final matches = data.map((m) => H2HMatch.fromJson(m)).toList();
+
+        int team1Wins = 0;
+        int team2Wins = 0;
+        int draws = 0;
+
+        String team1Name = '';
+        String team2Name = '';
+
+        for (final match in matches) {
+          if (team1Name.isEmpty) {
+            team1Name = match.homeTeam;
+            team2Name = match.awayTeam;
+          }
+
+          if (match.homeScore > match.awayScore) {
+            if (match.homeTeam == team1Name) {
+              team1Wins++;
+            } else {
+              team2Wins++;
+            }
+          } else if (match.awayScore > match.homeScore) {
+            if (match.awayTeam == team1Name) {
+              team1Wins++;
+            } else {
+              team2Wins++;
+            }
+          } else {
+            draws++;
+          }
+        }
+
+        return HeadToHead(
+          team1: team1Name,
+          team2: team2Name,
+          team1Wins: team1Wins,
+          team2Wins: team2Wins,
+          draws: draws,
+          recentMatches: matches,
+        );
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Récupère les informations détaillées d'une équipe par son ID
+  Future<Map<String, dynamic>?> getTeamInfo(int teamId) async {
+    try {
+      final response = await _dio.get(
+        ApiConstants.endpointTeams,
+        queryParameters: {'id': teamId},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['response'] as List;
+        if (data.isNotEmpty) {
+          return data[0] as Map<String, dynamic>;
+        }
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Récupère l'effectif d'une équipe
+  Future<List<Map<String, dynamic>>> getTeamSquad(int teamId) async {
+    try {
+      final response = await _dio.get(
+        ApiConstants.endpointSquads,
+        queryParameters: {'team': teamId},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['response'] as List;
+        if (data.isNotEmpty) {
+          final players = data[0]['players'] as List? ?? [];
+          return players.cast<Map<String, dynamic>>();
+        }
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Récupère l'entraîneur d'une équipe
+  Future<Map<String, dynamic>?> getTeamCoach(int teamId) async {
+    try {
+      final response = await _dio.get(
+        ApiConstants.endpointCoaches,
+        queryParameters: {'team': teamId},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['response'] as List;
+        if (data.isNotEmpty) {
+          return data[0] as Map<String, dynamic>;
+        }
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Récupère les blessures d'une équipe
+  Future<List<Map<String, dynamic>>> getInjuries({
+    int? teamId,
+    String? fixtureId,
+  }) async {
+    try {
+      final params = <String, dynamic>{
+        'league': ApiConstants.afconLeagueId,
+        'season': ApiConstants.afconSeason,
+      };
+      if (teamId != null) params['team'] = teamId;
+      if (fixtureId != null) params['fixture'] = fixtureId;
+
+      final response = await _dio.get(
+        ApiConstants.endpointInjuries,
+        queryParameters: params,
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['response'] as List;
+        return data.cast<Map<String, dynamic>>();
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Récupère les prédictions pour un match
+  Future<Map<String, dynamic>?> getMatchPredictions(String matchId) async {
+    try {
+      final response = await _dio.get(
+        ApiConstants.endpointPredictions,
+        queryParameters: {'fixture': matchId},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['response'] as List;
+        if (data.isNotEmpty) {
+          return data[0] as Map<String, dynamic>;
+        }
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Récupère un match spécifique par son ID
+  Future<Match?> getMatchById(String matchId) async {
+    try {
+      final response = await _dio.get(
+        ApiConstants.endpointFixtures,
+        queryParameters: {'id': matchId},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['response'] as List;
+        if (data.isNotEmpty) {
+          return _parseMatch(data[0]);
+        }
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Récupère les détails complets d'un match (score, buteurs, stats, compos)
+  Future<Map<String, dynamic>> getMatchFullDetails(String matchId) async {
+    try {
+      final results = await Future.wait([
+        getMatchById(matchId),
+        getMatchEvents(matchId),
+        getMatchStatistics(matchId),
+        getMatchLineups(matchId),
+      ]);
+
+      return {
+        'match': results[0] as Match?,
+        'events': results[1] as List<MatchEvent>,
+        'statistics': results[2] as MatchStatistics?,
+        'lineups': results[3] as List<TeamLineup>,
+      };
+    } catch (e) {
+      return {};
+    }
+  }
+
+  /// Cherche une équipe par nom dans les équipes de la CAN
+  int? getTeamIdByName(String teamName) {
+    final normalized = teamName.toLowerCase().trim();
+
+    // Mapping des noms vers les IDs API Football pour les équipes de la CAN
+    const teamIds = {
+      'maroc': 1056,
+      'morocco': 1056,
+      'mali': 1062,
+      'zambie': 1087,
+      'zambia': 1087,
+      'comores': 5659,
+      'comoros': 5659,
+      'egypte': 1052,
+      'egypt': 1052,
+      'égypte': 1052,
+      'afrique du sud': 1082,
+      'south africa': 1082,
+      'angola': 1064,
+      'zimbabwe': 1086,
+      'nigeria': 1066,
+      'tunisie': 1077,
+      'tunisia': 1077,
+      'ouganda': 1083,
+      'uganda': 1083,
+      'tanzanie': 1075,
+      'tanzania': 1075,
+      'senegal': 1072,
+      'sénégal': 1072,
+      'rd congo': 1074,
+      'dr congo': 1074,
+      'congo dr': 1074,
+      'benin': 1097,
+      'bénin': 1097,
+      'botswana': 1068,
+      'algerie': 1049,
+      'algérie': 1049,
+      'algeria': 1049,
+      'burkina faso': 1078,
+      'guinee equatoriale': 1089,
+      'guinée équatoriale': 1089,
+      'equatorial guinea': 1089,
+      'soudan': 1090,
+      'sudan': 1090,
+      'cote d\'ivoire': 1071,
+      'côte d\'ivoire': 1071,
+      'ivory coast': 1071,
+      'cameroun': 1073,
+      'cameroon': 1073,
+      'gabon': 1060,
+      'mozambique': 1067,
+    };
+
+    return teamIds[normalized];
   }
 
   /// Mapping des noms d'équipes vers les codes ISO

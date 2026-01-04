@@ -5,12 +5,14 @@ import '../providers/navigation_provider.dart';
 import '../router/app_router.dart';
 
 class BackChevronButton extends ConsumerWidget {
-  const BackChevronButton({super.key});
+  final Color? color;
+
+  const BackChevronButton({super.key, this.color});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return IconButton(
-      icon: const Icon(Icons.chevron_left),
+      icon: Icon(Icons.chevron_left, color: color),
       splashRadius: 24,
       onPressed: () {
         // Ensure the Home tab is selected in MainScreen

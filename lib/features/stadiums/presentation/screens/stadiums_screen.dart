@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/back_chevron_button.dart';
 
 class StadiumsScreen extends StatelessWidget {
   const StadiumsScreen({super.key});
@@ -9,10 +8,7 @@ class StadiumsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        leading: const BackChevronButton(),
-        title: const Text('Stades CAN 2025'),
-      ),
+      appBar: AppBar(title: const Text('Stades CAN 2025')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: const [
@@ -21,7 +17,7 @@ class StadiumsScreen extends StatelessWidget {
             city: 'Casablanca',
             capacity: '45 000',
             matches: 'Finale, Demi-finales, Phase de groupes',
-            imageEmoji: '🏟️',
+            imagePath: 'assets/images/stadecasa.jpg',
             description:
                 'Le plus grand stade du Maroc, rénové pour la CAN 2025. Il accueillera la finale et les matchs les plus importants.',
           ),
@@ -30,7 +26,7 @@ class StadiumsScreen extends StatelessWidget {
             city: 'Rabat',
             capacity: '53 000',
             matches: 'Demi-finale, Quarts, Phase de groupes',
-            imageEmoji: '🏟️',
+            imagePath: 'assets/images/stadium2.jpg',
             description:
                 'Situé dans la capitale, ce stade moderne accueillera plusieurs matchs de la phase à élimination directe.',
           ),
@@ -39,7 +35,7 @@ class StadiumsScreen extends StatelessWidget {
             city: 'Marrakech',
             capacity: '45 000',
             matches: 'Quarts de finale, Phase de groupes',
-            imageEmoji: '🏟️',
+            imagePath: 'assets/images/stademarrakech.jpg',
             description:
                 'Au cœur de la ville ocre, ce stade offre une atmosphère unique pour les matchs de la CAN.',
           ),
@@ -48,7 +44,7 @@ class StadiumsScreen extends StatelessWidget {
             city: 'Tanger',
             capacity: '45 000',
             matches: 'Huitièmes, Phase de groupes',
-            imageEmoji: '🏟️',
+            imagePath: 'assets/images/stadetanger.jpg',
             description:
                 'Stade Ibn Batouta, situé dans le nord du Maroc, avec vue sur le détroit de Gibraltar.',
           ),
@@ -57,7 +53,7 @@ class StadiumsScreen extends StatelessWidget {
             city: 'Fès',
             capacity: '35 000',
             matches: 'Phase de groupes',
-            imageEmoji: '🏟️',
+            imagePath: 'assets/images/stadefes.jpg',
             description:
                 'Dans la ville impériale de Fès, ce stade accueillera les matchs de la phase de groupes.',
           ),
@@ -66,7 +62,7 @@ class StadiumsScreen extends StatelessWidget {
             city: 'Agadir',
             capacity: '45 000',
             matches: 'Phase de groupes',
-            imageEmoji: '🏟️',
+            imagePath: 'assets/images/stadeagadir.jpg',
             description:
                 'Stade Adrar, situé dans le sud du Maroc, près de l\'océan Atlantique.',
           ),
@@ -81,7 +77,7 @@ class _StadiumCard extends StatelessWidget {
   final String city;
   final String capacity;
   final String matches;
-  final String imageEmoji;
+  final String? imagePath;
   final String description;
 
   const _StadiumCard({
@@ -89,7 +85,7 @@ class _StadiumCard extends StatelessWidget {
     required this.city,
     required this.capacity,
     required this.matches,
-    required this.imageEmoji,
+    this.imagePath,
     required this.description,
   });
 
@@ -111,35 +107,24 @@ class _StadiumCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Image placeholder
+          // Image du stade
           Container(
             height: 150,
             width: double.infinity,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppColors.primary, AppColors.primaryDark],
-              ),
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(16),
               ),
             ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(imageEmoji, style: const TextStyle(fontSize: 50)),
-                  const SizedBox(height: 8),
-                  Text(
-                    city,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            clipBehavior: Clip.antiAlias,
+            child: imagePath != null
+                ? Image.asset(
+                    imagePath!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        _buildPlaceholder(),
+                  )
+                : _buildPlaceholder(),
           ),
 
           // Infos
@@ -219,6 +204,33 @@ class _StadiumCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPlaceholder() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppColors.primary, AppColors.primaryDark],
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('🏟️', style: TextStyle(fontSize: 50)),
+            const SizedBox(height: 8),
+            Text(
+              city,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

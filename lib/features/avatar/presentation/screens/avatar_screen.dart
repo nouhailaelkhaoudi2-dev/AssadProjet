@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../../core/widgets/back_chevron_button.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -28,7 +27,6 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen>
   String _response = '';
 
   late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
 
   @override
   void initState() {
@@ -49,10 +47,6 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen>
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     )..repeat(reverse: true);
-
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
   }
 
   Future<void> _initTts() async {
@@ -226,308 +220,119 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundDark,
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        leading: const BackChevronButton(),
-        title: const Text('Avatar IA'),
+        leading: const BackChevronButton(color: Colors.white),
+        title: const Text('Avatar IA', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            flex: 3,
-            child: Stack(
-              children: [
-                Center(
-                  child: AnimatedBuilder(
-                    animation: _pulseAnimation,
-                    builder: (context, child) {
-                      return Container(
-                        width: _isSpeaking ? 300 : 260,
-                        height: _isSpeaking ? 300 : 260,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: _isSpeaking
-                                  ? AppColors.secondary.withValues(alpha: 0.5)
-                                  : AppColors.primary.withValues(alpha: 0.3),
-                              blurRadius: _isSpeaking ? 80 : 40,
-                              spreadRadius: _isSpeaking ? 30 : 15,
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AnimatedBuilder(
-                        animation: _pulseAnimation,
-                        builder: (context, child) {
-                          final bounceOffset = _isSpeaking
-                              ? math.sin(_pulseController.value * math.pi * 4) *
-                                    5
-                              : 0.0;
-
-                          return Transform.translate(
-                            offset: Offset(0, bounceOffset),
-                            child: Transform.scale(
-                              scale: _isSpeaking
-                                  ? 1.0 + (_pulseAnimation.value - 1.0) * 0.5
-                                  : 1.0,
-                              child: child,
-                            ),
-                          );
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(
-                                color:
-                                    (_isSpeaking
-                                            ? AppColors.secondary
-                                            : AppColors.primary)
-                                        .withValues(alpha: 0.4),
-                                blurRadius: _isSpeaking ? 50 : 30,
-                                spreadRadius: _isSpeaking ? 10 : 5,
-                              ),
-                            ],
-                          ),
-                          child: Image.asset(
-                            'assets/images/Capture_d_écran_2025-12-22_221422-removebg-preview.png',
-                            width: 250,
-                            height: 300,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: _isSpeaking
-                                ? [AppColors.secondary, AppColors.secondaryDark]
-                                : [AppColors.primary, AppColors.primaryDark],
-                          ),
-                          borderRadius: BorderRadius.circular(25),
-                          boxShadow: [
-                            BoxShadow(
-                              color:
-                                  (_isSpeaking
-                                          ? AppColors.secondary
-                                          : AppColors.primary)
-                                      .withValues(alpha: 0.5),
-                              blurRadius: 20,
-                              spreadRadius: 3,
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (_isSpeaking) ...[
-                              _buildSoundWave(),
-                              const SizedBox(width: 10),
-                            ],
-                            Text(
-                              _isSpeaking ? 'TikiTaka parle...' : 'TikiTaka',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _isListening
-                          ? AppColors.error.withValues(alpha: 0.2)
-                          : _isSpeaking
-                          ? AppColors.secondary.withValues(alpha: 0.2)
-                          : Colors.white.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: Row(
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // Avatar section
+                    Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          _isListening
-                              ? Icons.mic
-                              : _isSpeaking
-                              ? Icons.volume_up
-                              : Icons.mic_off,
-                          color: _isListening
-                              ? AppColors.error
-                              : _isSpeaking
-                              ? AppColors.secondary
-                              : Colors.white54,
-                          size: 20,
+                        Image.asset(
+                          'assets/images/Capture_d_écran_2025-12-22_221422-removebg-preview.png',
+                          width: 140,
+                          height: 170,
+                          fit: BoxFit.contain,
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _isListening
-                              ? 'Je vous écoute...'
-                              : _isSpeaking
-                              ? 'Je réponds...'
-                              : 'Appuyez pour parler',
-                          style: TextStyle(
-                            color: _isListening || _isSpeaking
-                                ? Colors.white
-                                : Colors.white54,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 13,
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            _isSpeaking ? 'Assad parle...' : 'Assad',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          if (_transcription.isNotEmpty)
-                            _buildMessageBubble(
-                              text: _transcription,
-                              isUser: true,
-                            ),
-                          if (_response.isNotEmpty)
-                            _buildMessageBubble(text: _response, isUser: false),
-                          if (_transcription.isEmpty && _response.isEmpty)
-                            Padding(
-                              padding: const EdgeInsets.all(20),
-                              child: Text(
+                    // Message box
+                    Container(
+                      height: 100,
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Center(
+                        child: _transcription.isNotEmpty || _response.isNotEmpty
+                            ? SingleChildScrollView(
+                                child: Column(
+                                  children: [
+                                    if (_transcription.isNotEmpty)
+                                      _buildMessageBubble(
+                                        text: _transcription,
+                                        isUser: true,
+                                      ),
+                                    if (_response.isNotEmpty)
+                                      _buildMessageBubble(
+                                        text: _response,
+                                        isUser: false,
+                                      ),
+                                  ],
+                                ),
+                              )
+                            : Text(
                                 'Posez-moi une question sur la CAN 2025 !',
                                 style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.5),
+                                  color: Colors.white.withValues(alpha: 0.6),
                                   fontSize: 14,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
-                            ),
-                        ],
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 32, top: 8),
-            child: GestureDetector(
-              onTapDown: (_) => _startListening(),
-              onTapUp: (_) => _stopListening(),
-              onTapCancel: () => _stopListening(),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: _isListening ? 85 : 75,
-                height: _isListening ? 85 : 75,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: _isListening
-                        ? [
-                            AppColors.error,
-                            AppColors.error.withValues(alpha: 0.7),
-                          ]
-                        : [AppColors.primary, AppColors.primaryDark],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color:
-                          (_isListening ? AppColors.error : AppColors.primary)
-                              .withValues(alpha: 0.4),
-                      blurRadius: 20,
-                      spreadRadius: 5,
+                    // Mic button
+                    GestureDetector(
+                      onTapDown: (_) => _startListening(),
+                      onTapUp: (_) => _stopListening(),
+                      onTapCancel: () => _stopListening(),
+                      child: Container(
+                        width: 55,
+                        height: 55,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _isListening
+                              ? AppColors.error
+                              : Colors.white.withValues(alpha: 0.2),
+                        ),
+                        child: Icon(
+                          _isListening ? Icons.mic : Icons.mic_none,
+                          color: Colors.white,
+                          size: 26,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-                child: Icon(
-                  _isListening ? Icons.mic : Icons.mic_none,
-                  color: Colors.white,
-                  size: 32,
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 24),
-            child: Text(
-              _speechAvailable
-                  ? 'Maintenez le bouton pour parler'
-                  : 'Reconnaissance vocale non disponible',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.4),
-                fontSize: 12,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSoundWave() {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(4, (index) {
-        return AnimatedBuilder(
-          animation: _pulseController,
-          builder: (context, child) {
-            final offset = index * 0.2;
-            final height =
-                8.0 +
-                8.0 * math.sin((_pulseController.value + offset) * math.pi * 2);
-            return Container(
-              width: 3,
-              height: height,
-              margin: const EdgeInsets.symmetric(horizontal: 1.5),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(2),
               ),
             );
           },
-        );
-      }),
+        ),
+      ),
     );
   }
 

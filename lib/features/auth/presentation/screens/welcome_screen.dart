@@ -14,10 +14,7 @@ class WelcomeScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              AppColors.primary,
-              AppColors.primaryDark,
-            ],
+            colors: [AppColors.primary, AppColors.primaryDark],
           ),
         ),
         child: SafeArea(
@@ -27,70 +24,12 @@ class WelcomeScreen extends StatelessWidget {
               children: [
                 const Spacer(flex: 2),
 
-                // Logo / Titre
-                Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: const Center(
-                    child: Text(
-                      '🦁',
-                      style: TextStyle(fontSize: 60),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-
-                // Titre principal
-                const Text(
-                  'CAN 2025',
-                  style: TextStyle(
-                    fontSize: 42,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 2,
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                const Text(
-                  'MOROCCO',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w300,
-                    color: Colors.white70,
-                    letterSpacing: 8,
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Slogan
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: const Text(
-                    'Votre assistant CAN intelligent',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                    ),
-                  ),
+                // Logo mascotte
+                Image.asset(
+                  'assets/images/Gemini_Generated_Image_5080iz5080iz5080-removebg-preview.png',
+                  width: 250,
+                  height: 250,
+                  fit: BoxFit.contain,
                 ),
 
                 const Spacer(flex: 3),
@@ -165,10 +104,7 @@ class WelcomeScreen extends StatelessWidget {
                 // Footer
                 const Text(
                   '© 2025 CAN Morocco',
-                  style: TextStyle(
-                    color: Colors.white38,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.white38, fontSize: 12),
                 ),
 
                 const SizedBox(height: 24),
