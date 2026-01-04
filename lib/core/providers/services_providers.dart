@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/football_api_service.dart';
 import '../services/news_api_service.dart';
@@ -211,38 +212,118 @@ class SentimentState {
 
 class SentimentNotifier extends StateNotifier<SentimentState> {
   final GroqService _groqService;
+  final NewsApiService _newsService;
 
-  SentimentNotifier(this._groqService) : super(SentimentState());
+  SentimentNotifier(this._groqService, this._newsService) : super(SentimentState());
 
-  Future<void> analyze(String text) async {
+  /// Analyse le sentiment global de la CAN 2025 basé sur les actualités réelles
+  Future<void> analyzeCanSentiment() async {
     state = SentimentState(isLoading: true);
 
     try {
-      final response = await _groqService.chat(
-        'Analyse le sentiment de ce texte et réponds uniquement avec: positif, négatif ou neutre. Texte: "$text"'
+      // Utiliser la même requête que la page News (qui fonctionne)
+      final articles = await _newsService.getNews(
+        query: 'CAN 2025 football Afrique',
+        pageSize: 15,
       );
 
-      String sentiment = 'neutre';
-      double score = 0.5;
-
-      final lowerResponse = response.toLowerCase();
-      if (lowerResponse.contains('positif')) {
-        sentiment = 'positif';
-        score = 0.8;
-      } else if (lowerResponse.contains('négatif')) {
-        sentiment = 'négatif';
-        score = 0.2;
+      print('SentimentAnalysis: ${articles.length} articles récupérés');
+      for (var i = 0; i < articles.length && i < 3; i++) {
+        print('Article $i: ${articles[i].title}');
       }
 
+      if (articles.isEmpty) {
+        state = SentimentState(
+          error: 'Aucune actualité disponible. Vérifiez votre connexion internet.',
+        );
+        return;
+      }
+
+      // Construire le texte à analyser à partir des titres et descriptions
+      final textsToAnalyze = articles.map((a) {
+        final title = a.title;
+        final desc = a.description ?? '';
+        return '$title. $desc';
+      }).join('\n\n');
+
+      // Prompt structuré pour obtenir une analyse complète
+      final prompt = '''Analyse le sentiment global des actualités suivantes concernant la CAN 2025 (Coupe d'Afrique des Nations au Maroc).
+
+ACTUALITÉS:
+$textsToAnalyze
+
+Réponds UNIQUEMENT avec un JSON valide dans ce format exact (sans texte avant ou après):
+{
+  "sentiment": "positif",
+  "score": 0.75,
+  "keywords": ["Maroc", "CAN 2025", "football", "organisation", "supporters"],
+  "summary": "Le sentiment général autour de la CAN 2025 au Maroc est très positif."
+}
+
+Remplace les valeurs par ton analyse réelle basée sur les actualités ci-dessus. Le score doit être entre 0.0 et 1.0.''';
+
+      final response = await _groqService.chat(prompt);
+
+      // Parser la réponse JSON
+      final parsed = _parseJsonResponse(response);
+
       state = SentimentState(
-        sentiment: sentiment,
-        score: score,
-        keywords: ['CAN 2025', 'Maroc'],
-        summary: response,
+        sentiment: parsed['sentiment'] ?? 'neutre',
+        score: (parsed['score'] as num?)?.toDouble() ?? 0.5,
+        keywords: (parsed['keywords'] as List<dynamic>?)?.cast<String>() ?? [],
+        summary: parsed['summary'] ?? 'Analyse non disponible.',
       );
     } catch (e) {
-      state = SentimentState(error: e.toString());
+      state = SentimentState(error: 'Erreur d\'analyse: ${e.toString()}');
     }
+  }
+
+  /// Parse la réponse JSON de Groq
+  Map<String, dynamic> _parseJsonResponse(String response) {
+    try {
+      // Nettoyer la réponse pour extraire le JSON
+      String cleanedResponse = response.trim();
+
+      // Chercher le JSON dans la réponse
+      final jsonStart = cleanedResponse.indexOf('{');
+      final jsonEnd = cleanedResponse.lastIndexOf('}');
+
+      if (jsonStart != -1 && jsonEnd != -1 && jsonEnd > jsonStart) {
+        cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1);
+      }
+
+      return json.decode(cleanedResponse) as Map<String, dynamic>;
+    } catch (e) {
+      // Fallback: parser manuellement si le JSON échoue
+      return _parseManually(response);
+    }
+  }
+
+  /// Parse manuellement si le JSON échoue
+  Map<String, dynamic> _parseManually(String response) {
+    final lowerResponse = response.toLowerCase();
+
+    String sentiment = 'neutre';
+    double score = 0.5;
+
+    if (lowerResponse.contains('positif') || lowerResponse.contains('positive')) {
+      sentiment = 'positif';
+      score = 0.75;
+    } else if (lowerResponse.contains('négatif') || lowerResponse.contains('negative')) {
+      sentiment = 'négatif';
+      score = 0.25;
+    }
+
+    // Extraire les mots-clés potentiels
+    final keywordPatterns = ['maroc', 'can 2025', 'football', 'stade', 'équipe', 'organisation', 'billets', 'fans'];
+    final foundKeywords = keywordPatterns.where((k) => lowerResponse.contains(k)).toList();
+
+    return {
+      'sentiment': sentiment,
+      'score': score,
+      'keywords': foundKeywords.take(5).toList(),
+      'summary': response.length > 200 ? '${response.substring(0, 200)}...' : response,
+    };
   }
 
   void reset() {
@@ -252,7 +333,8 @@ class SentimentNotifier extends StateNotifier<SentimentState> {
 
 final sentimentProvider = StateNotifierProvider<SentimentNotifier, SentimentState>((ref) {
   final groqService = ref.watch(groqServiceProvider);
-  return SentimentNotifier(groqService);
+  final newsService = ref.watch(newsServiceProvider);
+  return SentimentNotifier(groqService, newsService);
 });
 
 // Match Summary
