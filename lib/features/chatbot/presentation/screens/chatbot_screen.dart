@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/back_chevron_button.dart';
 import '../../../../core/services/groq_service.dart' hide ChatMessage;
 import '../../../../core/providers/services_providers.dart' hide ChatMessage;
 import '../../domain/entities/chat_message.dart';
@@ -37,7 +38,8 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
     _messages.add(
       ChatMessage.assistant(
         id: 'welcome',
-        content: '''Bienvenue ! Je suis TikiTaka, votre assistant IA pour la CAN 2025 Morocco.
+        content:
+            '''Bienvenue ! Je suis TikiTaka, votre assistant IA pour la CAN 2025 Morocco.
 
 Je peux vous aider avec :
 - Les matchs et résultats en temps réel
@@ -91,22 +93,27 @@ Comment puis-je vous aider ?''',
       final response = await _groqService.chat(text.trim());
 
       setState(() {
-        _messages.add(ChatMessage.assistant(
-          id: '${DateTime.now().millisecondsSinceEpoch}_response',
-          content: response,
-          sources: [
-            const MessageSource(name: 'Groq AI'),
-            const MessageSource(name: 'API-Football'),
-          ],
-        ));
+        _messages.add(
+          ChatMessage.assistant(
+            id: '${DateTime.now().millisecondsSinceEpoch}_response',
+            content: response,
+            sources: [
+              const MessageSource(name: 'Groq AI'),
+              const MessageSource(name: 'API-Football'),
+            ],
+          ),
+        );
         _isLoading = false;
       });
     } catch (e) {
       setState(() {
-        _messages.add(ChatMessage.assistant(
-          id: '${DateTime.now().millisecondsSinceEpoch}_error',
-          content: 'Désolé, une erreur s\'est produite. Réessayez votre question.',
-        ));
+        _messages.add(
+          ChatMessage.assistant(
+            id: '${DateTime.now().millisecondsSinceEpoch}_error',
+            content:
+                'Désolé, une erreur s\'est produite. Réessayez votre question.',
+          ),
+        );
         _isLoading = false;
       });
     }
@@ -119,9 +126,8 @@ Comment puis-je vous aider ?''',
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: const BackChevronButton(),
         title: const Text('Assistant CAN 2025'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),

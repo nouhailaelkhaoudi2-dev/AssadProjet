@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/back_chevron_button.dart';
 
 class StadiumsScreen extends StatelessWidget {
   const StadiumsScreen({super.key});
@@ -9,9 +10,8 @@ class StadiumsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: const BackChevronButton(),
         title: const Text('Stades CAN 2025'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -22,7 +22,8 @@ class StadiumsScreen extends StatelessWidget {
             capacity: '45 000',
             matches: 'Finale, Demi-finales, Phase de groupes',
             imageEmoji: '🏟️',
-            description: 'Le plus grand stade du Maroc, rénové pour la CAN 2025. Il accueillera la finale et les matchs les plus importants.',
+            description:
+                'Le plus grand stade du Maroc, rénové pour la CAN 2025. Il accueillera la finale et les matchs les plus importants.',
           ),
           _StadiumCard(
             name: 'Stade Prince Moulay Abdellah',
@@ -30,7 +31,8 @@ class StadiumsScreen extends StatelessWidget {
             capacity: '53 000',
             matches: 'Demi-finale, Quarts, Phase de groupes',
             imageEmoji: '🏟️',
-            description: 'Situé dans la capitale, ce stade moderne accueillera plusieurs matchs de la phase à élimination directe.',
+            description:
+                'Situé dans la capitale, ce stade moderne accueillera plusieurs matchs de la phase à élimination directe.',
           ),
           _StadiumCard(
             name: 'Grand Stade de Marrakech',
@@ -38,7 +40,8 @@ class StadiumsScreen extends StatelessWidget {
             capacity: '45 000',
             matches: 'Quarts de finale, Phase de groupes',
             imageEmoji: '🏟️',
-            description: 'Au cœur de la ville ocre, ce stade offre une atmosphère unique pour les matchs de la CAN.',
+            description:
+                'Au cœur de la ville ocre, ce stade offre une atmosphère unique pour les matchs de la CAN.',
           ),
           _StadiumCard(
             name: 'Grand Stade de Tanger',
@@ -46,7 +49,8 @@ class StadiumsScreen extends StatelessWidget {
             capacity: '45 000',
             matches: 'Huitièmes, Phase de groupes',
             imageEmoji: '🏟️',
-            description: 'Stade Ibn Batouta, situé dans le nord du Maroc, avec vue sur le détroit de Gibraltar.',
+            description:
+                'Stade Ibn Batouta, situé dans le nord du Maroc, avec vue sur le détroit de Gibraltar.',
           ),
           _StadiumCard(
             name: 'Stade de Fès',
@@ -54,7 +58,8 @@ class StadiumsScreen extends StatelessWidget {
             capacity: '35 000',
             matches: 'Phase de groupes',
             imageEmoji: '🏟️',
-            description: 'Dans la ville impériale de Fès, ce stade accueillera les matchs de la phase de groupes.',
+            description:
+                'Dans la ville impériale de Fès, ce stade accueillera les matchs de la phase de groupes.',
           ),
           _StadiumCard(
             name: 'Stade d\'Agadir',
@@ -62,7 +67,8 @@ class StadiumsScreen extends StatelessWidget {
             capacity: '45 000',
             matches: 'Phase de groupes',
             imageEmoji: '🏟️',
-            description: 'Stade Adrar, situé dans le sud du Maroc, près de l\'océan Atlantique.',
+            description:
+                'Stade Adrar, situé dans le sud du Maroc, près de l\'océan Atlantique.',
           ),
         ],
       ),
@@ -113,7 +119,9 @@ class _StadiumCard extends StatelessWidget {
               gradient: LinearGradient(
                 colors: [AppColors.primary, AppColors.primaryDark],
               ),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
             ),
             child: Center(
               child: Column(
@@ -133,7 +141,7 @@ class _StadiumCard extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Infos
           Padding(
             padding: const EdgeInsets.all(16),
@@ -149,23 +157,40 @@ class _StadiumCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                
+
                 Row(
                   children: [
-                    const Icon(Icons.location_on, size: 16, color: AppColors.textSecondary),
+                    const Icon(
+                      Icons.location_on,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
                     const SizedBox(width: 4),
-                    Text(city, style: const TextStyle(color: AppColors.textSecondary)),
+                    Text(
+                      city,
+                      style: const TextStyle(color: AppColors.textSecondary),
+                    ),
                     const SizedBox(width: 16),
-                    const Icon(Icons.people, size: 16, color: AppColors.textSecondary),
+                    const Icon(
+                      Icons.people,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
                     const SizedBox(width: 4),
-                    Text('$capacity places', style: const TextStyle(color: AppColors.textSecondary)),
+                    Text(
+                      '$capacity places',
+                      style: const TextStyle(color: AppColors.textSecondary),
+                    ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 12),
-                
+
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -179,9 +204,9 @@ class _StadiumCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 12),
-                
+
                 Text(
                   description,
                   style: TextStyle(
@@ -198,4 +223,3 @@ class _StadiumCard extends StatelessWidget {
     );
   }
 }
-

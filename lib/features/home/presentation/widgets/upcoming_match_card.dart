@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/flag_square.dart';
 
 class UpcomingMatchCard extends StatelessWidget {
   final String homeTeam;
-  final String homeFlag;
+  final String homeFlag; // emoji for fallback
   final String awayTeam;
-  final String awayFlag;
+  final String awayFlag; // emoji for fallback
   final String date;
   final String time;
   final String stadium;
   final String group;
+  final String homeCode;
+  final String awayCode;
+  final String? homeFlagUrl;
+  final String? awayFlagUrl;
 
   const UpcomingMatchCard({
     super.key,
@@ -21,6 +26,10 @@ class UpcomingMatchCard extends StatelessWidget {
     required this.time,
     required this.stadium,
     required this.group,
+    required this.homeCode,
+    required this.awayCode,
+    this.homeFlagUrl,
+    this.awayFlagUrl,
   });
 
   @override
@@ -40,30 +49,22 @@ class UpcomingMatchCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Header avec groupe et date
+          // Header centré: Nom du stade · date, heure
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
+              Icon(Icons.stadium, size: 16, color: Colors.grey[600]),
+              const SizedBox(width: 6),
+              Flexible(
                 child: Text(
-                  'Groupe $group',
-                  style: const TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
+                  '$stadium · $date, $time',
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
                   ),
-                ),
-              ),
-              Text(
-                date,
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 12,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
                 ),
               ),
             ],
@@ -78,9 +79,11 @@ class UpcomingMatchCard extends StatelessWidget {
               Expanded(
                 child: Column(
                   children: [
-                    Text(
-                      homeFlag,
-                      style: const TextStyle(fontSize: 36),
+                    FlagSquare(
+                      code: homeCode,
+                      emoji: homeFlag,
+                      imageUrl: homeFlagUrl,
+                      size: 44,
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -97,17 +100,20 @@ class UpcomingMatchCard extends StatelessWidget {
 
               // VS et heure
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
-                  color: AppColors.backgroundDark,
+                  color: Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
                   children: [
-                    const Text(
-                      'VS',
+                    Text(
+                      'vs',
                       style: TextStyle(
-                        color: Colors.white54,
+                        color: Colors.grey[700],
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
@@ -116,7 +122,7 @@ class UpcomingMatchCard extends StatelessWidget {
                     Text(
                       time,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppColors.textPrimary,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -129,9 +135,11 @@ class UpcomingMatchCard extends StatelessWidget {
               Expanded(
                 child: Column(
                   children: [
-                    Text(
-                      awayFlag,
-                      style: const TextStyle(fontSize: 36),
+                    FlagSquare(
+                      code: awayCode,
+                      emoji: awayFlag,
+                      imageUrl: awayFlagUrl,
+                      size: 44,
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -150,27 +158,20 @@ class UpcomingMatchCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // Stade
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.stadium,
-                size: 14,
-                color: Colors.grey[500],
-              ),
-              const SizedBox(width: 6),
-              Text(
-                stadium,
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 12,
-                ),
-              ),
-            ],
+          // Ligne d'information sous les équipes (phase ou groupe)
+          Text(
+            group.isNotEmpty ? 'Groupe $group' : 'Round of 16',
+            style: TextStyle(
+              color: Colors.grey[700],
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
+
+  // flags via FlagSquare
 }

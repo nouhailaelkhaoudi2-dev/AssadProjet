@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/back_chevron_button.dart';
 
 class NewsDetailScreen extends StatelessWidget {
   final String articleId;
@@ -21,6 +22,7 @@ class NewsDetailScreen extends StatelessWidget {
             expandedHeight: 250,
             pinned: true,
             backgroundColor: AppColors.primary,
+            leading: const BackChevronButton(),
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
                 fit: StackFit.expand,
@@ -201,18 +203,17 @@ class NewsDetailScreen extends StatelessWidget {
                   // Articles similaires
                   const Text(
                     'Articles similaires',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
 
-                  ..._similarArticles.map((similar) => _buildSimilarArticleCard(
-                    context,
-                    title: similar['title']!,
-                    source: similar['source']!,
-                  )),
+                  ..._similarArticles.map(
+                    (similar) => _buildSimilarArticleCard(
+                      context,
+                      title: similar['title']!,
+                      source: similar['source']!,
+                    ),
+                  ),
 
                   const SizedBox(height: 32),
                 ],
@@ -236,10 +237,7 @@ class NewsDetailScreen extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-          ),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8),
         ],
       ),
       child: Row(
@@ -251,10 +249,7 @@ class NewsDetailScreen extends StatelessWidget {
               color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(
-              Icons.article,
-              color: AppColors.primary,
-            ),
+            child: const Icon(Icons.article, color: AppColors.primary),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -281,26 +276,22 @@ class NewsDetailScreen extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(
-            Icons.chevron_right,
-            color: AppColors.textSecondary,
-          ),
+          const Icon(Icons.chevron_right, color: AppColors.textSecondary),
         ],
       ),
     );
   }
 
   void _openOriginalArticle(String url) {
-    launchUrl(
-      Uri.parse(url),
-      mode: LaunchMode.externalApplication,
-    );
+    launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
   }
 
   Map<String, String> get _demoArticle => {
     'title': 'Le Maroc fin prêt pour accueillir la CAN 2025',
-    'description': 'Le pays hôte a finalisé tous les préparatifs pour accueillir la plus grande compétition de football africain.',
-    'content': '''Le Maroc se prépare à accueillir la Coupe d'Afrique des Nations 2025, un événement qui marquera un tournant dans l'histoire du football africain. Les six stades sélectionnés pour le tournoi ont été rénovés et mis aux normes internationales.
+    'description':
+        'Le pays hôte a finalisé tous les préparatifs pour accueillir la plus grande compétition de football africain.',
+    'content':
+        '''Le Maroc se prépare à accueillir la Coupe d'Afrique des Nations 2025, un événement qui marquera un tournant dans l'histoire du football africain. Les six stades sélectionnés pour le tournoi ont été rénovés et mis aux normes internationales.
 
 Le Stade Mohammed V de Casablanca, qui accueillera la finale, a bénéficié d'une rénovation complète avec une capacité portée à 67 000 places. Les infrastructures de transport ont également été améliorées avec l'extension du réseau de tramway et la mise en service de nouvelles lignes de bus.
 

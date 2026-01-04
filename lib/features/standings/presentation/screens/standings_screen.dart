@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/providers/services_providers.dart';
+import '../../../../core/widgets/back_chevron_button.dart';
 
 class StandingsScreen extends ConsumerWidget {
   const StandingsScreen({super.key});
@@ -13,9 +14,8 @@ class StandingsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: const BackChevronButton(),
         title: const Text('Classement'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
       ),
       body: standingsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -117,34 +117,82 @@ class _GroupCard extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // En-tête du tableau
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             color: Colors.grey[100],
             child: const Row(
               children: [
-                SizedBox(width: 30, child: Text('#', style: TextStyle(fontWeight: FontWeight.bold))),
-                Expanded(child: Text('Équipe', style: TextStyle(fontWeight: FontWeight.bold))),
-                SizedBox(width: 30, child: Text('J', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold))),
-                SizedBox(width: 30, child: Text('G', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold))),
-                SizedBox(width: 30, child: Text('N', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold))),
-                SizedBox(width: 30, child: Text('P', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold))),
-                SizedBox(width: 40, child: Text('Pts', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold))),
+                SizedBox(
+                  width: 30,
+                  child: Text(
+                    '#',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    'Équipe',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                SizedBox(
+                  width: 30,
+                  child: Text(
+                    'J',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                SizedBox(
+                  width: 30,
+                  child: Text(
+                    'G',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                SizedBox(
+                  width: 30,
+                  child: Text(
+                    'N',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                SizedBox(
+                  width: 30,
+                  child: Text(
+                    'P',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                SizedBox(
+                  width: 40,
+                  child: Text(
+                    'Pts',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
               ],
             ),
           ),
-          
+
           // Équipes
           ...teams.asMap().entries.map((entry) {
             final index = entry.key;
             final team = entry.value;
             final isQualified = index < 2;
-            
+
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: isQualified ? AppColors.secondary.withValues(alpha: 0.05) : null,
+                color: isQualified
+                    ? AppColors.secondary.withValues(alpha: 0.05)
+                    : null,
                 border: Border(
                   bottom: BorderSide(color: Colors.grey[200]!, width: 1),
                 ),
@@ -157,7 +205,9 @@ class _GroupCard extends StatelessWidget {
                       width: 24,
                       height: 24,
                       decoration: BoxDecoration(
-                        color: isQualified ? AppColors.secondary : Colors.grey[300],
+                        color: isQualified
+                            ? AppColors.secondary
+                            : Colors.grey[300],
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Center(
@@ -178,10 +228,34 @@ class _GroupCard extends StatelessWidget {
                       style: const TextStyle(fontWeight: FontWeight.w500),
                     ),
                   ),
-                  SizedBox(width: 30, child: Text('${team['played'] ?? 0}', textAlign: TextAlign.center)),
-                  SizedBox(width: 30, child: Text('${team['won'] ?? 0}', textAlign: TextAlign.center)),
-                  SizedBox(width: 30, child: Text('${team['draw'] ?? 0}', textAlign: TextAlign.center)),
-                  SizedBox(width: 30, child: Text('${team['lost'] ?? 0}', textAlign: TextAlign.center)),
+                  SizedBox(
+                    width: 30,
+                    child: Text(
+                      '${team['played'] ?? 0}',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 30,
+                    child: Text(
+                      '${team['won'] ?? 0}',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 30,
+                    child: Text(
+                      '${team['draw'] ?? 0}',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 30,
+                    child: Text(
+                      '${team['lost'] ?? 0}',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                   SizedBox(
                     width: 40,
                     child: Text(
@@ -199,4 +273,3 @@ class _GroupCard extends StatelessWidget {
     );
   }
 }
-

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 class StatsCard extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
   final String value;
   final String label;
   final Color color;
 
   const StatsCard({
     super.key,
-    required this.icon,
+    this.icon,
     required this.value,
     required this.label,
     required this.color,
@@ -31,20 +31,20 @@ class StatsCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(10),
+          if (icon != null) ...[
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon!, color: color, size: 22),
             ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 22,
-            ),
-          ),
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
+          ] else ...[
+            const SizedBox(height: 4),
+          ],
           Text(
             value,
             style: TextStyle(
@@ -54,13 +54,7 @@ class StatsCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey[600],
-            ),
-          ),
+          Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
         ],
       ),
     );

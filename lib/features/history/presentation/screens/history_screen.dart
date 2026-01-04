@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/flag_square.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/back_chevron_button.dart';
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
@@ -9,9 +11,8 @@ class HistoryScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: const BackChevronButton(),
         title: const Text('Historique CAN'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -82,9 +83,9 @@ class HistoryScreen extends StatelessWidget {
             finalScore: '1-0',
             topScorer: 'Emmanuel Emenike (4 buts)',
           ),
-          
+
           SizedBox(height: 20),
-          
+
           _PalmaresSummary(),
         ],
       ),
@@ -115,8 +116,47 @@ class _HistoryCard extends StatelessWidget {
     required this.topScorer,
   });
 
+  // Map country names to ISO alpha-2 codes used by FlagSquare
+  String _codeFromName(String name) {
+    switch (name.toLowerCase()) {
+      case 'côte d\'ivoire':
+        return 'CI';
+      case 'nigeria':
+        return 'NG';
+      case 'sénégal':
+        return 'SN';
+      case 'égypte':
+        return 'EG';
+      case 'algérie':
+        return 'DZ';
+      case 'cameroun':
+        return 'CM';
+      case 'burkina faso':
+        return 'BF';
+      case 'gabon':
+        return 'GA';
+      case 'ghana':
+        return 'GH';
+      case 'afrique du sud':
+        return 'ZA';
+      case 'guinée équatoriale':
+        return 'GQ';
+      default:
+        return name.length >= 2 ? name.substring(0, 2).toUpperCase() : 'XX';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final String winnerCode = _codeFromName(winner);
+    final String runnerCode = _codeFromName(runnerUp);
+    final String hostCode = _codeFromName(host);
+    // Parse main score like "2-1" from strings such as "2-1" or "0-0 (4-2 tab)"
+    final String mainScore = finalScore.split(' ').first;
+    final List<String> parts = mainScore.split('-');
+    final String leftScore = parts.isNotEmpty ? parts[0] : '';
+    final String rightScore = parts.length > 1 ? parts[1] : '';
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -152,122 +192,127 @@ class _HistoryCard extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    Text(hostFlag, style: const TextStyle(fontSize: 24)),
+                    FlagSquare(code: hostCode, emoji: hostFlag, size: 24),
                     const SizedBox(width: 8),
-                    Text(
-                      host,
-                      style: const TextStyle(color: Colors.white70),
-                    ),
+                    Text(host, style: const TextStyle(color: Colors.white70)),
                   ],
                 ),
               ],
             ),
           ),
-          
-          // Finale
+
+          // Finale - scoreboard layout like provided mock
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  '🏆 FINALE',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.accent,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                
+                // Top row: competition + date (we use year) and status
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Winner
-                    Column(
-                      children: [
-                        Text(winnerFlag, style: const TextStyle(fontSize: 40)),
-                        const SizedBox(height: 4),
-                        Text(
-                          winner,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(top: 4),
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppColors.accent,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Text(
-                            'CHAMPION',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    
-                    // Score
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: AppColors.backgroundDark,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          finalScore,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                    Text(
+                      'CAN · $year',
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
                       ),
                     ),
-                    
-                    // Runner-up
-                    Column(
-                      children: [
-                        Text(runnerUpFlag, style: const TextStyle(fontSize: 40)),
-                        const SizedBox(height: 4),
-                        Text(
-                          runnerUp,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(top: 4),
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[400],
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Text(
-                            'FINALISTE',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
+                    const Text(
+                      'Terminé',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
-                
+
+                const SizedBox(height: 12),
+
+                // Middle row: flags and big score
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    FlagSquare(code: winnerCode, emoji: winnerFlag, size: 44),
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            leftScore,
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          const Text('-', style: TextStyle(fontSize: 24)),
+                          const SizedBox(width: 16),
+                          Text(
+                            rightScore,
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    FlagSquare(code: runnerCode, emoji: runnerUpFlag, size: 44),
+                  ],
+                ),
+
+                const SizedBox(height: 8),
+
+                // Names under flags
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          winner,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          runnerUp,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 12),
+                const Center(
+                  child: Text(
+                    'Finale',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+
                 const SizedBox(height: 16),
                 const Divider(),
                 const SizedBox(height: 8),
-                
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.sports_soccer, size: 16, color: AppColors.textSecondary),
+                    const Icon(
+                      Icons.sports_soccer,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'Meilleur buteur: $topScorer',
@@ -309,7 +354,7 @@ class _PalmaresSummary extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           const Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -323,7 +368,11 @@ class _PalmaresSummary extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _PalmaresItem(country: '🇳🇬', name: 'Nigeria', titles: '3'),
-              _PalmaresItem(country: '🇨🇮', name: 'Côte d\'Ivoire', titles: '3'),
+              _PalmaresItem(
+                country: '🇨🇮',
+                name: 'Côte d\'Ivoire',
+                titles: '3',
+              ),
               _PalmaresItem(country: '🇩🇿', name: 'Algérie', titles: '2'),
             ],
           ),
@@ -350,10 +399,7 @@ class _PalmaresItem extends StatelessWidget {
       children: [
         Text(country, style: const TextStyle(fontSize: 32)),
         const SizedBox(height: 4),
-        Text(
-          name,
-          style: const TextStyle(color: Colors.white70, fontSize: 12),
-        ),
+        Text(name, style: const TextStyle(color: Colors.white70, fontSize: 12)),
         Text(
           '$titles titres',
           style: const TextStyle(
@@ -365,4 +411,3 @@ class _PalmaresItem extends StatelessWidget {
     );
   }
 }
-

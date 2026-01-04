@@ -1,15 +1,12 @@
-import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
-import '../constants/api_constants.dart';
 
 /// Service Edge TTS - Utilise les voix neuronales Microsoft gratuites
 class EdgeTtsService {
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isSpeaking = false;
-  
+
   // Callbacks pour le statut
   VoidCallback? onStart;
   VoidCallback? onComplete;
@@ -29,7 +26,7 @@ class EdgeTtsService {
   /// Synthétise et joue le texte
   Future<void> speak(String text) async {
     if (text.isEmpty) return;
-    
+
     try {
       // Nettoyer le texte
       final cleanedText = _cleanText(text);
@@ -40,7 +37,7 @@ class EdgeTtsService {
 
       // Utiliser l'API TTS gratuite de StreamElements (utilise les voix Microsoft)
       final audioUrl = await _getAudioUrl(cleanedText);
-      
+
       if (audioUrl != null) {
         await _audioPlayer.setUrl(audioUrl);
         await _audioPlayer.play();
@@ -60,25 +57,26 @@ class EdgeTtsService {
       // Limiter la longueur du texte (max 500 caractères par requête)
       String processedText = text;
       if (text.length > 500) {
-        processedText = text.substring(0, 497) + '...';
+        processedText = '${text.substring(0, 497)}...';
       }
-      
+
       // Encoder le texte pour l'URL
       final encodedText = Uri.encodeComponent(processedText);
-      
+
       // Voix française - Brian (masculine) ou Mathieu (FR)
       // StreamElements supporte plusieurs voix, on utilise une voix française
       const voice = 'Mathieu'; // Voix française masculine naturelle
-      
+
       // URL de l'API StreamElements TTS (gratuit)
-      final url = 'https://api.streamelements.com/kappa/v2/speech?voice=$voice&text=$encodedText';
-      
+      final url =
+          'https://api.streamelements.com/kappa/v2/speech?voice=$voice&text=$encodedText';
+
       // Vérifier que l'URL est accessible
       final response = await http.head(Uri.parse(url));
       if (response.statusCode == 200) {
         return url;
       }
-      
+
       // Alternative : utiliser Google Translate TTS (gratuit mais qualité moindre)
       return _getGoogleTranslateTtsUrl(processedText);
     } catch (e) {
@@ -91,7 +89,7 @@ class EdgeTtsService {
   String _getGoogleTranslateTtsUrl(String text) {
     String processedText = text;
     if (text.length > 200) {
-      processedText = text.substring(0, 197) + '...';
+      processedText = '${text.substring(0, 197)}...';
     }
     final encodedText = Uri.encodeComponent(processedText);
     return 'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=fr&q=$encodedText';
@@ -146,10 +144,10 @@ class EdgeTtsService {
       r'[\u{3297}]|[\u{3299}]',
       unicode: true,
     );
-    
+
     String cleaned = text.replaceAll(emojiRegex, '');
     cleaned = cleaned.replaceAll(RegExp(r'\s+'), ' ').trim();
-    
+
     return cleaned;
   }
 
@@ -164,4 +162,3 @@ class EdgeTtsService {
     await _audioPlayer.dispose();
   }
 }
-

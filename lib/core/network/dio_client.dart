@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../constants/api_constants.dart';
 import '../constants/app_constants.dart';
 
@@ -9,17 +10,18 @@ class DioClient {
   DioClient() {
     _dio = Dio(
       BaseOptions(
-        connectTimeout: const Duration(milliseconds: AppConstants.connectionTimeout),
-        receiveTimeout: const Duration(milliseconds: AppConstants.receiveTimeout),
+        connectTimeout: const Duration(
+          milliseconds: AppConstants.connectionTimeout,
+        ),
+        receiveTimeout: const Duration(
+          milliseconds: AppConstants.receiveTimeout,
+        ),
         headers: ApiConstants.defaultHeaders,
       ),
     );
 
     // Ajout des intercepteurs
-    _dio.interceptors.addAll([
-      _LoggingInterceptor(),
-      _RetryInterceptor(_dio),
-    ]);
+    _dio.interceptors.addAll([_LoggingInterceptor(), _RetryInterceptor(_dio)]);
   }
 
   Dio get dio => _dio;
@@ -29,8 +31,12 @@ class DioClient {
     final footballDio = Dio(
       BaseOptions(
         baseUrl: ApiConstants.footballBaseUrl,
-        connectTimeout: const Duration(milliseconds: AppConstants.connectionTimeout),
-        receiveTimeout: const Duration(milliseconds: AppConstants.receiveTimeout),
+        connectTimeout: const Duration(
+          milliseconds: AppConstants.connectionTimeout,
+        ),
+        receiveTimeout: const Duration(
+          milliseconds: AppConstants.receiveTimeout,
+        ),
         headers: {
           ...ApiConstants.defaultHeaders,
           ApiConstants.footballApiKeyHeader: ApiKeys.footballApiKey,
@@ -49,8 +55,12 @@ class DioClient {
     final newsDio = Dio(
       BaseOptions(
         baseUrl: ApiConstants.newsBaseUrl,
-        connectTimeout: const Duration(milliseconds: AppConstants.connectionTimeout),
-        receiveTimeout: const Duration(milliseconds: AppConstants.receiveTimeout),
+        connectTimeout: const Duration(
+          milliseconds: AppConstants.connectionTimeout,
+        ),
+        receiveTimeout: const Duration(
+          milliseconds: AppConstants.receiveTimeout,
+        ),
         headers: {
           ...ApiConstants.defaultHeaders,
           ApiConstants.newsApiKeyHeader: ApiKeys.newsApiKey,
@@ -69,31 +79,35 @@ class DioClient {
 class _LoggingInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    print('┌─────────────────────────────────────────────────────');
-    print('│ REQUEST: ${options.method} ${options.uri}');
-    print('│ Headers: ${options.headers}');
+    debugPrint('┌─────────────────────────────────────────────────────');
+    debugPrint('│ REQUEST: ${options.method} ${options.uri}');
+    debugPrint('│ Headers: ${options.headers}');
     if (options.data != null) {
-      print('│ Data: ${options.data}');
+      debugPrint('│ Data: ${options.data}');
     }
-    print('└─────────────────────────────────────────────────────');
+    debugPrint('└─────────────────────────────────────────────────────');
     handler.next(options);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    print('┌─────────────────────────────────────────────────────');
-    print('│ RESPONSE: ${response.statusCode} ${response.requestOptions.uri}');
-    print('│ Data: ${response.data.toString().substring(0, response.data.toString().length.clamp(0, 500))}...');
-    print('└─────────────────────────────────────────────────────');
+    debugPrint('┌─────────────────────────────────────────────────────');
+    debugPrint(
+      '│ RESPONSE: ${response.statusCode} ${response.requestOptions.uri}',
+    );
+    debugPrint(
+      '│ Data: ${response.data.toString().substring(0, response.data.toString().length.clamp(0, 500))}...',
+    );
+    debugPrint('└─────────────────────────────────────────────────────');
     handler.next(response);
   }
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    print('┌─────────────────────────────────────────────────────');
-    print('│ ERROR: ${err.type} ${err.message}');
-    print('│ URL: ${err.requestOptions.uri}');
-    print('└─────────────────────────────────────────────────────');
+    debugPrint('┌─────────────────────────────────────────────────────');
+    debugPrint('│ ERROR: ${err.type} ${err.message}');
+    debugPrint('│ URL: ${err.requestOptions.uri}');
+    debugPrint('└─────────────────────────────────────────────────────');
     handler.next(err);
   }
 }
@@ -150,7 +164,11 @@ extension DioExtensions on Dio {
     Options? options,
   }) async {
     try {
-      return await get<T>(path, queryParameters: queryParameters, options: options);
+      return await get<T>(
+        path,
+        queryParameters: queryParameters,
+        options: options,
+      );
     } on DioException catch (e) {
       throw _handleDioError(e);
     }
@@ -164,7 +182,12 @@ extension DioExtensions on Dio {
     Options? options,
   }) async {
     try {
-      return await post<T>(path, data: data, queryParameters: queryParameters, options: options);
+      return await post<T>(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: options,
+      );
     } on DioException catch (e) {
       throw _handleDioError(e);
     }

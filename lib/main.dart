@@ -12,9 +12,14 @@ import 'core/constants/api_constants.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Charger les variables d'environnement
-  await dotenv.load(fileName: ".env");
-  
+  // Charger les variables d'environnement si le fichier existe
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    // Le fichier .env n'existe pas, utiliser des valeurs par défaut
+    debugPrint('Fichier .env non trouvé, utilisation des valeurs par défaut');
+  }
+
   // Initialiser les clés API
   ApiKeys.initKeys({
     'FOOTBALL_API_KEY': dotenv.env['FOOTBALL_API_KEY'] ?? '',
@@ -38,15 +43,9 @@ void main() async {
   );
 
   // Initialisation de Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  runApp(
-    const ProviderScope(
-      child: CANApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: CANApp()));
 }
 
 class CANApp extends ConsumerWidget {
@@ -87,9 +86,9 @@ class CANApp extends ConsumerWidget {
       builder: (context, child) {
         return MediaQuery(
           // Empêcher le redimensionnement du texte système
-          data: MediaQuery.of(context).copyWith(
-            textScaler: TextScaler.noScaling,
-          ),
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.noScaling),
           child: child ?? const SizedBox.shrink(),
         );
       },

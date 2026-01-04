@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/providers/services_providers.dart' hide ChatMessage;
 import '../../domain/entities/news_article.dart';
+import '../../../../core/widgets/back_chevron_button.dart';
 
 class NewsScreen extends ConsumerWidget {
   const NewsScreen({super.key});
@@ -15,9 +16,8 @@ class NewsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Actualités'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        leading: const BackChevronButton(),
+        title: const Text('News'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -116,11 +116,19 @@ class _FeaturedArticleCard extends StatelessWidget {
                         article.imageUrl!,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => const Center(
-                          child: Icon(Icons.image, size: 50, color: Colors.white54),
+                          child: Icon(
+                            Icons.image,
+                            size: 50,
+                            color: Colors.white54,
+                          ),
                         ),
                       )
                     : const Center(
-                        child: Icon(Icons.newspaper, size: 50, color: Colors.white54),
+                        child: Icon(
+                          Icons.newspaper,
+                          size: 50,
+                          color: Colors.white54,
+                        ),
                       ),
               ),
 
@@ -149,7 +157,10 @@ class _FeaturedArticleCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.primary,
                         borderRadius: BorderRadius.circular(12),
@@ -287,20 +298,18 @@ class _ArticleCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         article.source,
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 11,
-                        ),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 11),
                       ),
                       const SizedBox(width: 8),
-                      Icon(Icons.access_time, size: 12, color: Colors.grey[500]),
+                      Icon(
+                        Icons.access_time,
+                        size: 12,
+                        color: Colors.grey[500],
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         article.timeAgo,
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 11,
-                        ),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 11),
                       ),
                     ],
                   ),

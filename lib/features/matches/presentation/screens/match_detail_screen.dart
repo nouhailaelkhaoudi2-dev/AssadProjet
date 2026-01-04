@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/back_chevron_button.dart';
+import '../../../../core/widgets/flag_square.dart';
 import '../../domain/entities/match.dart';
 import '../../domain/entities/team.dart';
 
@@ -32,6 +34,7 @@ class MatchDetailScreen extends StatelessWidget {
             expandedHeight: 280,
             pinned: true,
             backgroundColor: AppColors.primary,
+            leading: const BackChevronButton(),
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 decoration: const BoxDecoration(
@@ -70,9 +73,11 @@ class MatchDetailScreen extends StatelessWidget {
                           Expanded(
                             child: Column(
                               children: [
-                                Text(
-                                  match.homeTeam.flagEmoji,
-                                  style: const TextStyle(fontSize: 50),
+                                FlagSquare(
+                                  code: match.homeTeam.code,
+                                  imageUrl: match.homeTeam.flagUrl,
+                                  emoji: match.homeTeam.flagEmoji,
+                                  size: 44,
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
@@ -112,9 +117,11 @@ class MatchDetailScreen extends StatelessWidget {
                           Expanded(
                             child: Column(
                               children: [
-                                Text(
-                                  match.awayTeam.flagEmoji,
-                                  style: const TextStyle(fontSize: 50),
+                                FlagSquare(
+                                  code: match.awayTeam.code,
+                                  imageUrl: match.awayTeam.flagUrl,
+                                  emoji: match.awayTeam.flagEmoji,
+                                  size: 44,
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
@@ -169,10 +176,7 @@ class MatchDetailScreen extends StatelessWidget {
                   // Statistiques (données fictives)
                   const Text(
                     'Statistiques',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
                   _buildStatRow('Possession', 55, 45),
@@ -325,8 +329,18 @@ class MatchDetailScreen extends StatelessWidget {
 
   String _formatDateTime(DateTime dt) {
     const months = [
-      'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-      'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'
+      'janvier',
+      'février',
+      'mars',
+      'avril',
+      'mai',
+      'juin',
+      'juillet',
+      'août',
+      'septembre',
+      'octobre',
+      'novembre',
+      'décembre',
     ];
     return '${dt.day} ${months[dt.month - 1]} ${dt.year} à ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   }

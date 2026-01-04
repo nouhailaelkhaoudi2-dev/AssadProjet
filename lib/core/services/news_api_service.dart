@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../constants/api_constants.dart';
 import '../../features/news/domain/entities/news_article.dart';
 
@@ -7,11 +8,13 @@ class NewsApiService {
   late final Dio _dio;
 
   NewsApiService() {
-    _dio = Dio(BaseOptions(
-      baseUrl: ApiConstants.newsBaseUrl,
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
-    ));
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: ApiConstants.newsBaseUrl,
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
+      ),
+    );
   }
 
   /// Récupère les actualités de la CAN 2025
@@ -37,15 +40,13 @@ class NewsApiService {
       }
       return _getDemoNews();
     } catch (e) {
-      print('Erreur GNews: $e');
+      debugPrint('Erreur GNews: $e');
       return _getDemoNews();
     }
   }
 
   /// Récupère les headlines sportifs
-  Future<List<NewsArticle>> getSportsHeadlines({
-    int pageSize = 10,
-  }) async {
+  Future<List<NewsArticle>> getSportsHeadlines({int pageSize = 10}) async {
     try {
       final response = await _dio.get(
         ApiConstants.endpointTopHeadlines,
@@ -64,7 +65,7 @@ class NewsApiService {
       }
       return _getDemoNews();
     } catch (e) {
-      print('Erreur GNews headlines: $e');
+      debugPrint('Erreur GNews headlines: $e');
       return _getDemoNews();
     }
   }
@@ -98,8 +99,10 @@ class NewsApiService {
       NewsArticle(
         id: '1',
         title: 'Le Maroc dévoile sa liste de 26 joueurs pour la CAN 2025',
-        description: 'Le sélectionneur Walid Regragui a annoncé la liste des Lions de l\'Atlas.',
-        content: 'Le sélectionneur national Walid Regragui a dévoilé la liste des 26 joueurs qui défendront les couleurs du Maroc lors de la CAN 2025. On retrouve les cadres habituels comme Achraf Hakimi, Hakim Ziyech et Youssef En-Nesyri.',
+        description:
+            'Le sélectionneur Walid Regragui a annoncé la liste des Lions de l\'Atlas.',
+        content:
+            'Le sélectionneur national Walid Regragui a dévoilé la liste des 26 joueurs qui défendront les couleurs du Maroc lors de la CAN 2025. On retrouve les cadres habituels comme Achraf Hakimi, Hakim Ziyech et Youssef En-Nesyri.',
         imageUrl: null,
         url: 'https://example.com/article1',
         source: 'Le Matin Sport',
@@ -110,7 +113,8 @@ class NewsApiService {
         id: '2',
         title: 'CAN 2025 : Les stades marocains sont prêts',
         description: 'Les six stades ont été inspectés et validés par la CAF.',
-        content: 'La CAF a officiellement validé les six stades marocains pour la CAN 2025.',
+        content:
+            'La CAF a officiellement validé les six stades marocains pour la CAN 2025.',
         imageUrl: null,
         url: 'https://example.com/article2',
         source: 'CAF Official',
@@ -121,7 +125,8 @@ class NewsApiService {
         id: '3',
         title: 'Billetterie CAN 2025 : Plus de 500 000 billets vendus',
         description: 'L\'engouement pour la compétition se confirme.',
-        content: 'En moins d\'une semaine, plus de 500 000 billets ont trouvé preneurs.',
+        content:
+            'En moins d\'une semaine, plus de 500 000 billets ont trouvé preneurs.',
         imageUrl: null,
         url: 'https://example.com/article3',
         source: 'Africa Sports',

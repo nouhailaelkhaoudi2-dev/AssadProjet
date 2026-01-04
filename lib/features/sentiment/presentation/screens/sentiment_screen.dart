@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/back_chevron_button.dart';
 
 class SentimentScreen extends StatefulWidget {
   const SentimentScreen({super.key});
@@ -56,9 +57,8 @@ class _SentimentScreenState extends State<SentimentScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Sentiment'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        leading: const BackChevronButton(),
+        title: const Text('Analyse de Sentiment'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -83,10 +83,7 @@ class _SentimentScreenState extends State<SentimentScreen> {
                 children: [
                   const Text(
                     'Analyse de sentiment',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   const Text(
@@ -114,7 +111,9 @@ class _SentimentScreenState extends State<SentimentScreen> {
                             },
                             selectedColor: AppColors.primary,
                             labelStyle: TextStyle(
-                              color: isSelected ? Colors.white : AppColors.textPrimary,
+                              color: isSelected
+                                  ? Colors.white
+                                  : AppColors.textPrimary,
                             ),
                           ),
                         );
@@ -242,14 +241,11 @@ class _SentimentScreenState extends State<SentimentScreen> {
                       children: [
                         const Text(
                           'Tendance globale',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
-                          ),
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          data['positive']! > 60 ? 'Très positive 😊' : 'Positive 🙂',
+                          data['positive']! > 60 ? 'Très positive' : 'Positive',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 18,
@@ -282,7 +278,10 @@ class _SentimentScreenState extends State<SentimentScreen> {
                 runSpacing: 8,
                 children: _topHashtags.map((hashtag) {
                   return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
@@ -310,7 +309,10 @@ class _SentimentScreenState extends State<SentimentScreen> {
                 runSpacing: 8,
                 children: _topKeywords.map((keyword) {
                   return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.secondary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
@@ -329,32 +331,7 @@ class _SentimentScreenState extends State<SentimentScreen> {
 
             const SizedBox(height: 24),
 
-            // Disclaimer
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.accent.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.info_outline, color: AppColors.accent, size: 20),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Données de démonstration. En production, les données seraient collectées depuis Twitter, YouTube et autres sources.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 32),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -422,10 +399,7 @@ class _LegendItem extends StatelessWidget {
             Container(
               width: 12,
               height: 12,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             ),
             const SizedBox(width: 6),
             Text(
@@ -440,10 +414,7 @@ class _LegendItem extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ],
     );

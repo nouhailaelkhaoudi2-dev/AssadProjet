@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/providers/favorite_team_provider.dart';
 import '../../../matches/domain/entities/team.dart';
+import '../../../../core/widgets/back_chevron_button.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -18,9 +19,8 @@ class SettingsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Profil'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        leading: const BackChevronButton(),
+        title: const Text('Paramètres'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -32,9 +32,15 @@ class SettingsScreen extends ConsumerWidget {
               title: 'Préférences',
               children: [
                 _SettingsTile(
+                  icon: Icons.edit,
+                  title: 'Modifier le profil',
+                  subtitle: 'Nom d\'affichage',
+                  onTap: () => _showEditProfileDialog(context),
+                ),
+                _SettingsTile(
                   icon: Icons.favorite,
                   title: 'Équipe favorite',
-                  subtitle: favoriteTeam != null 
+                  subtitle: favoriteTeam != null
                       ? '${favoriteTeam.flagEmoji} ${favoriteTeam.name}'
                       : 'Aucune équipe sélectionnée',
                   onTap: () => _showTeamPicker(context, ref),
@@ -51,7 +57,7 @@ class SettingsScreen extends ConsumerWidget {
                   trailing: Switch(
                     value: false,
                     onChanged: (value) {},
-                    activeColor: AppColors.primary,
+                    activeTrackColor: AppColors.primary,
                   ),
                 ),
               ],
@@ -66,7 +72,7 @@ class SettingsScreen extends ConsumerWidget {
                   trailing: Switch(
                     value: true,
                     onChanged: (value) {},
-                    activeColor: AppColors.primary,
+                    activeTrackColor: AppColors.primary,
                   ),
                 ),
                 _SettingsTile(
@@ -75,7 +81,7 @@ class SettingsScreen extends ConsumerWidget {
                   trailing: Switch(
                     value: true,
                     onChanged: (value) {},
-                    activeColor: AppColors.primary,
+                    activeTrackColor: AppColors.primary,
                   ),
                 ),
               ],
@@ -111,6 +117,74 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
+  void _showEditProfileDialog(BuildContext context) {
+    final authUser = FirebaseAuth.instance.currentUser;
+    if (authUser == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Veuillez vous connecter')));
+      return;
+    }
+
+    final nameController = TextEditingController(
+      text: authUser.displayName ?? '',
+    );
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) {
+        return AlertDialog(
+          title: const Text('Modifier le nom'),
+          content: TextField(
+            controller: nameController,
+            decoration: const InputDecoration(labelText: 'Nom d\'affichage'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogCtx).pop(),
+              child: const Text('Annuler'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final navigator = Navigator.of(dialogCtx);
+                final messenger = ScaffoldMessenger.of(context);
+                final newName = nameController.text.trim();
+
+                if (newName.isEmpty) {
+                  messenger.showSnackBar(
+                    const SnackBar(
+                      content: Text('Le nom ne peut pas être vide'),
+                    ),
+                  );
+                  return;
+                }
+
+                FirebaseAuth.instance.currentUser
+                    ?.updateDisplayName(newName)
+                    .then((_) async {
+                      await FirebaseAuth.instance.currentUser?.reload();
+                      navigator.pop();
+                      messenger.showSnackBar(
+                        const SnackBar(content: Text('Profil mis à jour')),
+                      );
+                      if (context.mounted) {
+                        context.go(AppRoutes.settings);
+                      }
+                    })
+                    .catchError((e) {
+                      messenger.showSnackBar(
+                        SnackBar(content: Text('Erreur: $e')),
+                      );
+                    });
+              },
+              child: const Text('Enregistrer'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildProfileHeader(User? user, Team? favoriteTeam) {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -136,10 +210,10 @@ class SettingsScreen extends ConsumerWidget {
             ),
             child: Center(
               child: Text(
-                favoriteTeam?.flagEmoji ?? 
-                  (user?.displayName?.isNotEmpty == true
-                      ? user!.displayName![0].toUpperCase()
-                      : '👤'),
+                favoriteTeam?.flagEmoji ??
+                    (user?.displayName?.isNotEmpty == true
+                        ? user!.displayName![0].toUpperCase()
+                        : '👤'),
                 style: const TextStyle(
                   fontSize: 32,
                   color: Colors.white,
@@ -155,7 +229,10 @@ class SettingsScreen extends ConsumerWidget {
           ),
           if (user?.email != null) ...[
             const SizedBox(height: 4),
-            Text(user!.email!, style: const TextStyle(color: AppColors.textSecondary)),
+            Text(
+              user!.email!,
+              style: const TextStyle(color: AppColors.textSecondary),
+            ),
           ],
           if (favoriteTeam != null) ...[
             const SizedBox(height: 12),
@@ -168,11 +245,17 @@ class SettingsScreen extends ConsumerWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(favoriteTeam.flagEmoji, style: const TextStyle(fontSize: 18)),
+                  Text(
+                    favoriteTeam.flagEmoji,
+                    style: const TextStyle(fontSize: 18),
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'Supporter ${favoriteTeam.name}',
-                    style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
@@ -183,7 +266,10 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSection({required String title, required List<Widget> children}) {
+  Widget _buildSection({
+    required String title,
+    required List<Widget> children,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -222,7 +308,10 @@ class SettingsScreen extends ConsumerWidget {
       child: OutlinedButton.icon(
         onPressed: () => _signOut(context),
         icon: const Icon(Icons.logout, color: AppColors.error),
-        label: const Text('Se déconnecter', style: TextStyle(color: AppColors.error)),
+        label: const Text(
+          'Se déconnecter',
+          style: TextStyle(color: AppColors.error),
+        ),
         style: OutlinedButton.styleFrom(
           side: const BorderSide(color: AppColors.error),
           padding: const EdgeInsets.symmetric(vertical: 14),
@@ -233,7 +322,7 @@ class SettingsScreen extends ConsumerWidget {
 
   void _showTeamPicker(BuildContext context, WidgetRef ref) {
     final favoriteTeam = ref.read(favoriteTeamProvider);
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -267,7 +356,9 @@ class SettingsScreen extends ConsumerWidget {
                   if (favoriteTeam != null)
                     TextButton(
                       onPressed: () {
-                        ref.read(favoriteTeamProvider.notifier).clearFavoriteTeam();
+                        ref
+                            .read(favoriteTeamProvider.notifier)
+                            .clearFavoriteTeam();
                         Navigator.pop(context);
                       },
                       child: const Text('Réinitialiser'),
@@ -296,28 +387,38 @@ class SettingsScreen extends ConsumerWidget {
                       return Container(
                         margin: const EdgeInsets.only(bottom: 8),
                         decoration: BoxDecoration(
-                          color: isSelected 
+                          color: isSelected
                               ? AppColors.primary.withValues(alpha: 0.1)
                               : Colors.grey[50],
                           borderRadius: BorderRadius.circular(12),
-                          border: isSelected 
+                          border: isSelected
                               ? Border.all(color: AppColors.primary, width: 2)
                               : null,
                         ),
                         child: ListTile(
-                          leading: Text(team.flagEmoji, style: const TextStyle(fontSize: 28)),
+                          leading: Text(
+                            team.flagEmoji,
+                            style: const TextStyle(fontSize: 28),
+                          ),
                           title: Text(
                             team.name,
                             style: TextStyle(
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                               color: isSelected ? AppColors.primary : null,
                             ),
                           ),
-                          trailing: isSelected 
-                              ? const Icon(Icons.check_circle, color: AppColors.primary)
+                          trailing: isSelected
+                              ? const Icon(
+                                  Icons.check_circle,
+                                  color: AppColors.primary,
+                                )
                               : null,
                           onTap: () {
-                            ref.read(favoriteTeamProvider.notifier).setFavoriteTeam(team);
+                            ref
+                                .read(favoriteTeamProvider.notifier)
+                                .setFavoriteTeam(team);
                             Navigator.pop(context);
                           },
                         ),

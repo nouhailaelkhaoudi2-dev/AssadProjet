@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/back_chevron_button.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -14,7 +15,8 @@ class AvatarScreen extends ConsumerStatefulWidget {
   ConsumerState<AvatarScreen> createState() => _AvatarScreenState();
 }
 
-class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProviderStateMixin {
+class _AvatarScreenState extends ConsumerState<AvatarScreen>
+    with TickerProviderStateMixin {
   final FlutterTts _tts = FlutterTts();
   final stt.SpeechToText _speech = stt.SpeechToText();
   late GroqService _groqService;
@@ -78,7 +80,7 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
       await _tts.setPitch(1.0);
 
       await Future.delayed(const Duration(milliseconds: 500));
-      
+
       List<dynamic>? voiceList;
       for (int i = 0; i < 5; i++) {
         final voices = await _tts.getVoices;
@@ -95,33 +97,37 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
           final name = voice['name']?.toString().toLowerCase() ?? '';
           return locale.contains('fr') || name.contains('french');
         }).toList();
-        
+
         if (frenchVoices.isNotEmpty) {
           dynamic selectedVoice;
-          
+
           // Voix masculines en priorité
-          selectedVoice = frenchVoices.cast<dynamic?>().firstWhere(
-            (v) => v?['name']?.toString().toLowerCase().contains('henri') == true,
+          selectedVoice = frenchVoices.cast<dynamic>().firstWhere(
+            (v) =>
+                v?['name']?.toString().toLowerCase().contains('henri') == true,
             orElse: () => null,
           );
-          
-          selectedVoice ??= frenchVoices.cast<dynamic?>().firstWhere(
-            (v) => v?['name']?.toString().toLowerCase().contains('paul') == true,
+
+          selectedVoice ??= frenchVoices.cast<dynamic>().firstWhere(
+            (v) =>
+                v?['name']?.toString().toLowerCase().contains('paul') == true,
             orElse: () => null,
           );
-          
-          selectedVoice ??= frenchVoices.cast<dynamic?>().firstWhere(
-            (v) => v?['name']?.toString().toLowerCase().contains('google') == true,
+
+          selectedVoice ??= frenchVoices.cast<dynamic>().firstWhere(
+            (v) =>
+                v?['name']?.toString().toLowerCase().contains('google') == true,
             orElse: () => null,
           );
-          
-          selectedVoice ??= frenchVoices.cast<dynamic?>().firstWhere(
-            (v) => v?['name']?.toString().toLowerCase().contains('thomas') == true,
+
+          selectedVoice ??= frenchVoices.cast<dynamic>().firstWhere(
+            (v) =>
+                v?['name']?.toString().toLowerCase().contains('thomas') == true,
             orElse: () => null,
           );
-          
+
           selectedVoice ??= frenchVoices.first;
-          
+
           await _tts.setVoice({
             'name': selectedVoice['name'],
             'locale': selectedVoice['locale'],
@@ -181,7 +187,7 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
       r'[\u{FE00}-\u{FE0F}]|[\u{1F900}-\u{1F9FF}]|[\u{1FA00}-\u{1FAFF}]',
       unicode: true,
     );
-    
+
     String cleaned = text.replaceAll(emojiRegex, '');
     cleaned = cleaned.replaceAll(RegExp(r'\s+'), ' ').trim();
     return cleaned;
@@ -204,9 +210,9 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -222,6 +228,7 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
     return Scaffold(
       backgroundColor: AppColors.backgroundDark,
       appBar: AppBar(
+        leading: const BackChevronButton(),
         title: const Text('Avatar IA'),
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
@@ -263,14 +270,17 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
                       AnimatedBuilder(
                         animation: _pulseAnimation,
                         builder: (context, child) {
-                          final bounceOffset = _isSpeaking 
-                              ? math.sin(_pulseController.value * math.pi * 4) * 5
+                          final bounceOffset = _isSpeaking
+                              ? math.sin(_pulseController.value * math.pi * 4) *
+                                    5
                               : 0.0;
-                          
+
                           return Transform.translate(
                             offset: Offset(0, bounceOffset),
                             child: Transform.scale(
-                              scale: _isSpeaking ? 1.0 + (_pulseAnimation.value - 1.0) * 0.5 : 1.0,
+                              scale: _isSpeaking
+                                  ? 1.0 + (_pulseAnimation.value - 1.0) * 0.5
+                                  : 1.0,
                               child: child,
                             ),
                           );
@@ -279,8 +289,11 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
                           decoration: BoxDecoration(
                             boxShadow: [
                               BoxShadow(
-                                color: (_isSpeaking ? AppColors.secondary : AppColors.primary)
-                                    .withValues(alpha: 0.4),
+                                color:
+                                    (_isSpeaking
+                                            ? AppColors.secondary
+                                            : AppColors.primary)
+                                        .withValues(alpha: 0.4),
                                 blurRadius: _isSpeaking ? 50 : 30,
                                 spreadRadius: _isSpeaking ? 10 : 5,
                               ),
@@ -297,7 +310,10 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
                       const SizedBox(height: 16),
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: _isSpeaking
@@ -307,8 +323,11 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
                           borderRadius: BorderRadius.circular(25),
                           boxShadow: [
                             BoxShadow(
-                              color: (_isSpeaking ? AppColors.secondary : AppColors.primary)
-                                  .withValues(alpha: 0.5),
+                              color:
+                                  (_isSpeaking
+                                          ? AppColors.secondary
+                                          : AppColors.primary)
+                                      .withValues(alpha: 0.5),
                               blurRadius: 20,
                               spreadRadius: 3,
                             ),
@@ -351,28 +370,45 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
               child: Column(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
                       color: _isListening
                           ? AppColors.error.withValues(alpha: 0.2)
                           : _isSpeaking
-                              ? AppColors.secondary.withValues(alpha: 0.2)
-                              : Colors.white.withValues(alpha: 0.1),
+                          ? AppColors.secondary.withValues(alpha: 0.2)
+                          : Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(25),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          _isListening ? Icons.mic : _isSpeaking ? Icons.volume_up : Icons.mic_off,
-                          color: _isListening ? AppColors.error : _isSpeaking ? AppColors.secondary : Colors.white54,
+                          _isListening
+                              ? Icons.mic
+                              : _isSpeaking
+                              ? Icons.volume_up
+                              : Icons.mic_off,
+                          color: _isListening
+                              ? AppColors.error
+                              : _isSpeaking
+                              ? AppColors.secondary
+                              : Colors.white54,
                           size: 20,
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          _isListening ? 'Je vous écoute...' : _isSpeaking ? 'Je réponds...' : 'Appuyez pour parler',
+                          _isListening
+                              ? 'Je vous écoute...'
+                              : _isSpeaking
+                              ? 'Je réponds...'
+                              : 'Appuyez pour parler',
                           style: TextStyle(
-                            color: _isListening || _isSpeaking ? Colors.white : Colors.white54,
+                            color: _isListening || _isSpeaking
+                                ? Colors.white
+                                : Colors.white54,
                             fontWeight: FontWeight.w500,
                             fontSize: 13,
                           ),
@@ -386,7 +422,10 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
                       child: Column(
                         children: [
                           if (_transcription.isNotEmpty)
-                            _buildMessageBubble(text: _transcription, isUser: true),
+                            _buildMessageBubble(
+                              text: _transcription,
+                              isUser: true,
+                            ),
                           if (_response.isNotEmpty)
                             _buildMessageBubble(text: _response, isUser: false),
                           if (_transcription.isEmpty && _response.isEmpty)
@@ -394,7 +433,10 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
                               padding: const EdgeInsets.all(20),
                               child: Text(
                                 'Posez-moi une question sur la CAN 2025 !',
-                                style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 14),
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.5),
+                                  fontSize: 14,
+                                ),
                                 textAlign: TextAlign.center,
                               ),
                             ),
@@ -422,12 +464,17 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: _isListening
-                        ? [AppColors.error, AppColors.error.withValues(alpha: 0.7)]
+                        ? [
+                            AppColors.error,
+                            AppColors.error.withValues(alpha: 0.7),
+                          ]
                         : [AppColors.primary, AppColors.primaryDark],
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: (_isListening ? AppColors.error : AppColors.primary).withValues(alpha: 0.4),
+                      color:
+                          (_isListening ? AppColors.error : AppColors.primary)
+                              .withValues(alpha: 0.4),
                       blurRadius: 20,
                       spreadRadius: 5,
                     ),
@@ -444,8 +491,13 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
           Padding(
             padding: const EdgeInsets.only(bottom: 24),
             child: Text(
-              _speechAvailable ? 'Maintenez le bouton pour parler' : 'Reconnaissance vocale non disponible',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 12),
+              _speechAvailable
+                  ? 'Maintenez le bouton pour parler'
+                  : 'Reconnaissance vocale non disponible',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.4),
+                fontSize: 12,
+              ),
             ),
           ),
         ],
@@ -461,7 +513,9 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
           animation: _pulseController,
           builder: (context, child) {
             final offset = index * 0.2;
-            final height = 8.0 + 8.0 * math.sin((_pulseController.value + offset) * math.pi * 2);
+            final height =
+                8.0 +
+                8.0 * math.sin((_pulseController.value + offset) * math.pi * 2);
             return Container(
               width: 3,
               height: height,
@@ -479,18 +533,30 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
 
   Widget _buildMessageBubble({required String text, required bool isUser}) {
     return Container(
-      margin: EdgeInsets.only(bottom: 8, left: isUser ? 40 : 0, right: isUser ? 0 : 40),
+      margin: EdgeInsets.only(
+        bottom: 8,
+        left: isUser ? 40 : 0,
+        right: isUser ? 0 : 40,
+      ),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isUser ? Colors.white.withValues(alpha: 0.1) : AppColors.primary.withValues(alpha: 0.2),
+        color: isUser
+            ? Colors.white.withValues(alpha: 0.1)
+            : AppColors.primary.withValues(alpha: 0.2),
         borderRadius: BorderRadius.only(
           topLeft: const Radius.circular(16),
           topRight: const Radius.circular(16),
-          bottomLeft: isUser ? const Radius.circular(16) : const Radius.circular(4),
-          bottomRight: isUser ? const Radius.circular(4) : const Radius.circular(16),
+          bottomLeft: isUser
+              ? const Radius.circular(16)
+              : const Radius.circular(4),
+          bottomRight: isUser
+              ? const Radius.circular(4)
+              : const Radius.circular(16),
         ),
         border: Border.all(
-          color: isUser ? Colors.white.withValues(alpha: 0.1) : AppColors.primary.withValues(alpha: 0.3),
+          color: isUser
+              ? Colors.white.withValues(alpha: 0.1)
+              : AppColors.primary.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -513,12 +579,23 @@ class _AvatarScreenState extends ConsumerState<AvatarScreen> with TickerProvider
               const SizedBox(width: 6),
               Text(
                 isUser ? 'Vous' : 'TikiTaka',
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 11, fontWeight: FontWeight.w500),
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 6),
-          Text(text, style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.4)),
+          Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              height: 1.4,
+            ),
+          ),
         ],
       ),
     );

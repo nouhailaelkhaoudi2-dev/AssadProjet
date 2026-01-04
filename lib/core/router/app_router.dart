@@ -18,6 +18,7 @@ import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/stadiums/presentation/screens/stadiums_screen.dart';
 import '../../features/standings/presentation/screens/standings_screen.dart';
 import '../../features/history/presentation/screens/history_screen.dart';
+// Removed unused direct profile screen import; profile route links to Settings.
 
 /// Routes de l'application
 class AppRoutes {
@@ -43,6 +44,7 @@ class AppRoutes {
   static const String stadiums = '/stadiums';
   static const String standings = '/standings';
   static const String history = '/history';
+  static const String profile = '/profile';
 }
 
 /// Configuration du router
@@ -160,6 +162,12 @@ class AppRouter {
         name: 'history',
         builder: (context, state) => const HistoryScreen(),
       ),
+      // Profile
+      GoRoute(
+        path: AppRoutes.profile,
+        name: 'profile',
+        builder: (context, state) => const SettingsScreen(),
+      ),
     ],
 
     // Gestion des erreurs de navigation
@@ -188,7 +196,7 @@ class AppRouter {
 
     // Redirection basée sur l'auth (à implémenter)
     redirect: (context, state) {
-      // TODO: Implémenter la logique de redirection basée sur l'authentification
+      // NOTE: La logique de redirection basée sur l'authentification sera implémentée ultérieurement
       // final isLoggedIn = authProvider.isLoggedIn;
       // final isAuthRoute = state.matchedLocation == AppRoutes.login ||
       //     state.matchedLocation == AppRoutes.register ||

@@ -19,9 +19,10 @@ class ApiConstants {
 
   // GNews API (supporte CORS)
   static const String newsBaseUrl = 'https://gnews.io/api/v4';
+  static const String newsApiKeyHeader = 'x-api-key';
   static const String endpointSearch = '/search';
   static const String endpointTopHeadlines = '/top-headlines';
-  
+
   // Paramètres de recherche News par défaut
   static const String newsDefaultQuery = 'CAN 2025 football Afrique';
   static const String newsLanguage = 'fr';
@@ -33,7 +34,8 @@ class ApiConstants {
 
   // Edge TTS (Microsoft Neural Voices - Gratuit)
   // Voix françaises disponibles : fr-FR-DeniseNeural, fr-FR-HenriNeural
-  static const String edgeTtsVoice = 'fr-FR-DeniseNeural'; // Voix féminine naturelle
+  static const String edgeTtsVoice =
+      'fr-FR-DeniseNeural'; // Voix féminine naturelle
   static const String edgeTtsLanguage = 'fr-FR';
 
   // Headers communs
@@ -49,6 +51,7 @@ class ApiKeys {
 
   static String get footballApiKey => _env['FOOTBALL_API_KEY'] ?? '';
   static String get gnewsApiKey => _env['GNEWS_API_KEY'] ?? '';
+  static String get newsApiKey => _env['GNEWS_API_KEY'] ?? '';
   static String get groqApiKey => _env['GROQ_API_KEY'] ?? '';
 
   // Les clés sont initialisées au démarrage via initKeys()

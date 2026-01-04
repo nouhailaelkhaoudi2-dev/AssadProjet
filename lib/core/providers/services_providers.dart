@@ -24,7 +24,17 @@ final groqServiceProvider = Provider<GroqService>((ref) {
 
 final upcomingMatchesProvider = FutureProvider<List<Match>>((ref) async {
   final service = ref.watch(footballServiceProvider);
-  return service.getUpcomingMatches(limit: 10);
+  // Try upcoming; fallback to today, then live, then recent results.
+  final upcoming = await service.getUpcomingMatches(limit: 10);
+  if (upcoming.isNotEmpty) return upcoming;
+
+  final today = await service.getTodayMatches();
+  if (today.isNotEmpty) return today;
+
+  final live = await service.getLiveMatches();
+  if (live.isNotEmpty) return live;
+
+  return service.getResults(limit: 10);
 });
 
 final todayMatchesProvider = FutureProvider<List<Match>>((ref) async {
@@ -42,45 +52,64 @@ final resultsProvider = FutureProvider<List<Match>>((ref) async {
   return service.getResults(limit: 10);
 });
 
-final standingsProvider = FutureProvider<Map<String, List<Map<String, dynamic>>>>((ref) async {
-  final service = ref.watch(footballServiceProvider);
-  return service.getStandings();
-});
+final standingsProvider =
+    FutureProvider<Map<String, List<Map<String, dynamic>>>>((ref) async {
+      final service = ref.watch(footballServiceProvider);
+      return service.getStandings();
+    });
 
 final prioritizedMatchesProvider = FutureProvider<List<Match>>((ref) async {
   final service = ref.watch(footballServiceProvider);
   final favoriteTeam = ref.watch(favoriteTeamProvider);
-  final matches = await service.getUpcomingMatches(limit: 20);
-  
+
+  // Compose a list with fallbacks similar to upcoming provider.
+  List<Match> matches = await service.getUpcomingMatches(limit: 20);
+  if (matches.isEmpty) {
+    matches = await service.getTodayMatches();
+  }
+  if (matches.isEmpty) {
+    matches = await service.getLiveMatches();
+  }
+  if (matches.isEmpty) {
+    matches = await service.getResults(limit: 20);
+  }
+
   if (favoriteTeam == null) {
     return matches.take(10).toList();
   }
-  
-  final favoriteMatches = matches.where((m) =>
-    m.homeTeam.code == favoriteTeam.code ||
-    m.awayTeam.code == favoriteTeam.code
-  ).toList();
-  
-  final otherMatches = matches.where((m) =>
-    m.homeTeam.code != favoriteTeam.code &&
-    m.awayTeam.code != favoriteTeam.code
-  ).toList();
-  
+
+  final favoriteMatches = matches
+      .where(
+        (m) =>
+            m.homeTeam.code == favoriteTeam.code ||
+            m.awayTeam.code == favoriteTeam.code,
+      )
+      .toList();
+
+  final otherMatches = matches
+      .where(
+        (m) =>
+            m.homeTeam.code != favoriteTeam.code &&
+            m.awayTeam.code != favoriteTeam.code,
+      )
+      .toList();
+
   return [...favoriteMatches, ...otherMatches].take(10).toList();
 });
 
 final favoriteTeamPlaysTodayProvider = FutureProvider<Match?>((ref) async {
   final service = ref.watch(footballServiceProvider);
   final favoriteTeam = ref.watch(favoriteTeamProvider);
-  
+
   if (favoriteTeam == null) return null;
-  
+
   final todayMatches = await service.getTodayMatches();
-  
+
   try {
-    return todayMatches.firstWhere((m) =>
-      m.homeTeam.code == favoriteTeam.code ||
-      m.awayTeam.code == favoriteTeam.code
+    return todayMatches.firstWhere(
+      (m) =>
+          m.homeTeam.code == favoriteTeam.code ||
+          m.awayTeam.code == favoriteTeam.code,
     );
   } catch (_) {
     return null;
@@ -92,14 +121,14 @@ final favoriteTeamPlaysTodayProvider = FutureProvider<Match?>((ref) async {
 final newsProvider = FutureProvider<List<NewsArticle>>((ref) async {
   final service = ref.watch(newsServiceProvider);
   final favoriteTeam = ref.watch(favoriteTeamProvider);
-  
+
   if (favoriteTeam != null) {
     return service.getNews(
       query: '${favoriteTeam.name} football CAN 2025',
       pageSize: 20,
     );
   }
-  
+
   return service.getNews(pageSize: 20);
 });
 
@@ -108,7 +137,10 @@ final sportsHeadlinesProvider = FutureProvider<List<NewsArticle>>((ref) async {
   return service.getSportsHeadlines();
 });
 
-final teamNewsProvider = FutureProvider.family<List<NewsArticle>, String>((ref, teamName) async {
+final teamNewsProvider = FutureProvider.family<List<NewsArticle>, String>((
+  ref,
+  teamName,
+) async {
   final service = ref.watch(newsServiceProvider);
   return service.searchByTeam(teamName);
 });
@@ -116,11 +148,11 @@ final teamNewsProvider = FutureProvider.family<List<NewsArticle>, String>((ref, 
 final favoriteTeamNewsProvider = FutureProvider<List<NewsArticle>>((ref) async {
   final service = ref.watch(newsServiceProvider);
   final favoriteTeam = ref.watch(favoriteTeamProvider);
-  
+
   if (favoriteTeam == null) {
     return [];
   }
-  
+
   return service.searchByTeam(favoriteTeam.name);
 });
 
@@ -131,11 +163,8 @@ class ChatMessage {
   final bool isUser;
   final DateTime timestamp;
 
-  ChatMessage({
-    required this.text,
-    required this.isUser,
-    DateTime? timestamp,
-  }) : timestamp = timestamp ?? DateTime.now();
+  ChatMessage({required this.text, required this.isUser, DateTime? timestamp})
+    : timestamp = timestamp ?? DateTime.now();
 }
 
 class ChatNotifier extends StateNotifier<List<ChatMessage>> {
@@ -166,10 +195,11 @@ class ChatNotifier extends StateNotifier<List<ChatMessage>> {
   }
 }
 
-final chatMessagesProvider = StateNotifierProvider<ChatNotifier, List<ChatMessage>>((ref) {
-  final groqService = ref.watch(groqServiceProvider);
-  return ChatNotifier(groqService);
-});
+final chatMessagesProvider =
+    StateNotifierProvider<ChatNotifier, List<ChatMessage>>((ref) {
+      final groqService = ref.watch(groqServiceProvider);
+      return ChatNotifier(groqService);
+    });
 
 // Sentiment Analysis
 
@@ -219,7 +249,7 @@ class SentimentNotifier extends StateNotifier<SentimentState> {
 
     try {
       final response = await _groqService.chat(
-        'Analyse le sentiment de ce texte et réponds uniquement avec: positif, négatif ou neutre. Texte: "$text"'
+        'Analyse le sentiment de ce texte et réponds uniquement avec: positif, négatif ou neutre. Texte: "$text"',
       );
 
       String sentiment = 'neutre';
@@ -250,19 +280,21 @@ class SentimentNotifier extends StateNotifier<SentimentState> {
   }
 }
 
-final sentimentProvider = StateNotifierProvider<SentimentNotifier, SentimentState>((ref) {
-  final groqService = ref.watch(groqServiceProvider);
-  return SentimentNotifier(groqService);
-});
+final sentimentProvider =
+    StateNotifierProvider<SentimentNotifier, SentimentState>((ref) {
+      final groqService = ref.watch(groqServiceProvider);
+      return SentimentNotifier(groqService);
+    });
 
 // Match Summary
 
-final matchSummaryProvider = FutureProvider.family<String, Map<String, dynamic>>((ref, params) async {
-  final groqService = ref.watch(groqServiceProvider);
-  return groqService.generateMatchSummary(
-    params['homeTeam'] as String,
-    params['awayTeam'] as String,
-    params['homeScore'] as int,
-    params['awayScore'] as int,
-  );
-});
+final matchSummaryProvider =
+    FutureProvider.family<String, Map<String, dynamic>>((ref, params) async {
+      final groqService = ref.watch(groqServiceProvider);
+      return groqService.generateMatchSummary(
+        params['homeTeam'] as String,
+        params['awayTeam'] as String,
+        params['homeScore'] as int,
+        params['awayScore'] as int,
+      );
+    });

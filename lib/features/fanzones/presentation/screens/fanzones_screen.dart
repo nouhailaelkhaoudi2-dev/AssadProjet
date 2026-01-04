@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/back_chevron_button.dart';
 import '../../data/models/fanzone.dart';
 
 class FanzonesScreen extends StatelessWidget {
@@ -11,9 +12,8 @@ class FanzonesScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: const BackChevronButton(),
         title: const Text('Fanzones'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -53,64 +53,94 @@ class _FanzoneCard extends StatelessWidget {
           Container(
             height: 120,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.primary,
-                  AppColors.primaryDark,
-                ],
+              // Use image background for Casablanca, Rabat, Marrakech, Tanger, Fès and Agadir; gradient for others
+              image:
+                  (fanzone.city.toLowerCase() == 'casablanca' ||
+                      fanzone.city.toLowerCase() == 'rabat' ||
+                      fanzone.city.toLowerCase() == 'marrakech' ||
+                      fanzone.city.toLowerCase() == 'tanger' ||
+                      fanzone.city.toLowerCase() == 'fès' ||
+                      fanzone.city.toLowerCase() == 'fes' ||
+                      fanzone.city.toLowerCase() == 'agadir')
+                  ? DecorationImage(
+                      image: AssetImage(
+                        fanzone.city.toLowerCase() == 'casablanca'
+                            ? 'assets/images/fanzonecasa.jpg'
+                            : (fanzone.city.toLowerCase() == 'rabat'
+                                  ? 'assets/images/fanzonerabat.jpg'
+                                  : (fanzone.city.toLowerCase() == 'marrakech'
+                                        ? 'assets/images/fanzonemarrakech.jpg'
+                                        : (fanzone.city.toLowerCase() ==
+                                                  'tanger'
+                                              ? 'assets/images/fanzonetanger.jpg'
+                                              : (fanzone.city.toLowerCase() ==
+                                                        'agadir'
+                                                    ? 'assets/images/fanzoneagadir.jpg'
+                                                    : 'assets/images/fanzonefes.jpg')))),
+                      ),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
+              gradient:
+                  (fanzone.city.toLowerCase() == 'casablanca' ||
+                      fanzone.city.toLowerCase() == 'rabat' ||
+                      fanzone.city.toLowerCase() == 'marrakech' ||
+                      fanzone.city.toLowerCase() == 'tanger' ||
+                      fanzone.city.toLowerCase() == 'fès' ||
+                      fanzone.city.toLowerCase() == 'fes' ||
+                      fanzone.city.toLowerCase() == 'agadir')
+                  ? null
+                  : LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [AppColors.primary, AppColors.primaryDark],
+                    ),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
               ),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             ),
             child: Stack(
               children: [
                 // Pattern décoratif
-                Positioned(
-                  right: -30,
-                  top: -30,
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.1),
+                if (!(fanzone.city.toLowerCase() == 'casablanca' ||
+                    fanzone.city.toLowerCase() == 'rabat' ||
+                    fanzone.city.toLowerCase() == 'marrakech' ||
+                    fanzone.city.toLowerCase() == 'tanger' ||
+                    fanzone.city.toLowerCase() == 'fès' ||
+                    fanzone.city.toLowerCase() == 'fes' ||
+                    fanzone.city.toLowerCase() == 'agadir')) ...[
+                  Positioned(
+                    right: -30,
+                    top: -30,
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withValues(alpha: 0.1),
+                      ),
                     ),
                   ),
-                ),
-                Positioned(
-                  left: -20,
-                  bottom: -20,
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.05),
+                  Positioned(
+                    left: -20,
+                    bottom: -20,
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withValues(alpha: 0.05),
+                      ),
                     ),
                   ),
-                ),
+                ],
 
                 // Contenu
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            '🎉',
-                            style: TextStyle(fontSize: 30),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
+                      // Small image removed to keep only text on header
                       Expanded(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -190,10 +220,7 @@ class _FanzoneCard extends StatelessWidget {
                 if (fanzone.amenities.isNotEmpty) ...[
                   const Text(
                     'Équipements',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                   const SizedBox(height: 8),
                   Wrap(
@@ -239,9 +266,7 @@ class _FanzoneCard extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             fanzone.address,
-                            style: const TextStyle(
-                              fontSize: 14,
-                            ),
+                            style: const TextStyle(fontSize: 14),
                           ),
                         ],
                       ),
@@ -281,10 +306,7 @@ class _InfoChip extends StatelessWidget {
   final IconData icon;
   final String label;
 
-  const _InfoChip({
-    required this.icon,
-    required this.label,
-  });
+  const _InfoChip({required this.icon, required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -301,10 +323,7 @@ class _InfoChip extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppColors.textPrimary,
-            ),
+            style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
           ),
         ],
       ),

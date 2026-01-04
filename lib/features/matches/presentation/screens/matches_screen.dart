@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/back_chevron_button.dart';
+import '../../../../core/widgets/flag_square.dart';
 import '../../../../core/providers/services_providers.dart' hide ChatMessage;
 import '../../domain/entities/match.dart';
 
@@ -11,7 +13,8 @@ class MatchesScreen extends ConsumerStatefulWidget {
   ConsumerState<MatchesScreen> createState() => _MatchesScreenState();
 }
 
-class _MatchesScreenState extends ConsumerState<MatchesScreen> with SingleTickerProviderStateMixin {
+class _MatchesScreenState extends ConsumerState<MatchesScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String _selectedGroup = 'Tous';
 
@@ -44,14 +47,13 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> with SingleTicker
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: const BackChevronButton(),
         title: const Text('Matchs'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
+          labelColor: Colors.black,
+          unselectedLabelColor: Colors.black,
           tabs: const [
             Tab(text: 'À venir'),
             Tab(text: 'En direct'),
@@ -85,8 +87,12 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> with SingleTicker
                     selectedColor: AppColors.primary.withValues(alpha: 0.2),
                     checkmarkColor: AppColors.primary,
                     labelStyle: TextStyle(
-                      color: isSelected ? AppColors.primary : AppColors.textSecondary,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                      color: isSelected
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
                     ),
                   ),
                 );
@@ -110,7 +116,10 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> with SingleTicker
     );
   }
 
-  Widget _buildAsyncMatchList(AsyncValue<List<Match>> asyncValue, String emptyMessage) {
+  Widget _buildAsyncMatchList(
+    AsyncValue<List<Match>> asyncValue,
+    String emptyMessage,
+  ) {
     return asyncValue.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => Center(
@@ -149,10 +158,7 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> with SingleTicker
             const SizedBox(height: 16),
             Text(
               emptyMessage,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[500],
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey[500]),
             ),
           ],
         ),
@@ -192,47 +198,48 @@ class _MatchCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Header
+          // Top line: Stadium · date, time
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
+              Icon(Icons.stadium, size: 16, color: Colors.grey[600]),
+              const SizedBox(width: 6),
+              Flexible(
                 child: Text(
-                  'Groupe ${match.group}',
-                  style: const TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
+                  '${match.stadium} · ${_topDateLabel(match.dateTime)}, ${_formatTime(match.dateTime)}',
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              _buildStatusBadge(),
             ],
           ),
 
           const SizedBox(height: 16),
 
-          // Équipes
+          // Teams row with square flags and names, VS in middle
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      match.homeTeam.flagEmoji,
-                      style: const TextStyle(fontSize: 32),
+                    FlagSquare(
+                      code: match.homeTeam.code,
+                      imageUrl: match.homeTeam.flagUrl,
+                      emoji: match.homeTeam.flagEmoji,
+                      size: 44,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     Text(
                       match.homeTeam.name,
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
-                        fontSize: 14,
+                        fontSize: 15,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -240,59 +247,36 @@ class _MatchCard extends StatelessWidget {
                 ),
               ),
 
-              // Score ou heure
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                decoration: BoxDecoration(
-                  color: match.status.isFinished
-                      ? AppColors.backgroundDark
-                      : AppColors.background,
-                  borderRadius: BorderRadius.circular(12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  match.status.isFinished ? match.scoreDisplay : 'vs',
+                  style: TextStyle(
+                    color: match.status.isFinished
+                        ? AppColors.textPrimary
+                        : Colors.grey[700],
+                    fontSize: match.status.isFinished ? 18 : 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-                child: match.status.isFinished
-                    ? Text(
-                        match.scoreDisplay,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      )
-                    : Column(
-                        children: [
-                          Text(
-                            _formatDate(match.dateTime),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _formatTime(match.dateTime),
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ],
-                      ),
               ),
 
               Expanded(
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      match.awayTeam.flagEmoji,
-                      style: const TextStyle(fontSize: 32),
+                    FlagSquare(
+                      code: match.awayTeam.code,
+                      imageUrl: match.awayTeam.flagUrl,
+                      emoji: match.awayTeam.flagEmoji,
+                      size: 44,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     Text(
                       match.awayTeam.name,
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
-                        fontSize: 14,
+                        fontSize: 15,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -302,74 +286,67 @@ class _MatchCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
 
-          // Stade
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.stadium, size: 14, color: Colors.grey[500]),
-              const SizedBox(width: 6),
-              Text(
-                '${match.stadium}, ${match.city}',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 12,
-                ),
-              ),
-            ],
+          // Tournament phase centered under
+          Text(
+            _phaseLabel(match.phase),
+            style: TextStyle(
+              color: Colors.grey[700],
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatusBadge() {
-    Color bgColor;
-    Color textColor;
-    String text;
-
-    switch (match.status) {
-      case MatchStatus.live:
-      case MatchStatus.halftime:
-        bgColor = AppColors.error.withValues(alpha: 0.1);
-        textColor = AppColors.error;
-        text = match.status == MatchStatus.halftime ? 'Mi-temps' : 'EN DIRECT';
-        break;
-      case MatchStatus.finished:
-        bgColor = AppColors.secondary.withValues(alpha: 0.1);
-        textColor = AppColors.secondary;
-        text = 'Terminé';
-        break;
-      default:
-        bgColor = AppColors.accent.withValues(alpha: 0.1);
-        textColor = AppColors.accent;
-        text = 'À venir';
+  String _phaseLabel(TournamentPhase phase) {
+    switch (phase) {
+      case TournamentPhase.roundOf16:
+        return 'Round of 16';
+      case TournamentPhase.quarterFinal:
+        return 'Quarter-finals';
+      case TournamentPhase.semiFinal:
+        return 'Semi-finals';
+      case TournamentPhase.final_:
+        return 'Final';
+      case TournamentPhase.thirdPlace:
+        return 'Third place';
+      case TournamentPhase.groupStage:
+        return match.group != null ? 'Group ${match.group}' : 'Group stage';
     }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: textColor,
-          fontWeight: FontWeight.w600,
-          fontSize: 12,
-        ),
-      ),
-    );
   }
 
   String _formatDate(DateTime dt) {
-    const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+    const months = [
+      'Jan',
+      'Fév',
+      'Mar',
+      'Avr',
+      'Mai',
+      'Jun',
+      'Jul',
+      'Aoû',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Déc',
+    ];
     return '${dt.day} ${months[dt.month - 1]}';
   }
 
   String _formatTime(DateTime dt) {
     return '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+  }
+
+  String _topDateLabel(DateTime dt) {
+    final today = DateTime.now();
+    final isSameDay =
+        dt.year == today.year && dt.month == today.month && dt.day == today.day;
+    if (isSameDay) return 'Aujourd\'hui';
+    return _formatDate(dt);
   }
 }
